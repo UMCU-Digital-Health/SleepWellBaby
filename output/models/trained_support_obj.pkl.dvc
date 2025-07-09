@@ -1,0 +1,4 @@
+outs:
+- md5: 19914f7106d786c3438ad17ee12ff10f
+  size: 3897
+  path: trained_support_obj.pkl
