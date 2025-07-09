@@ -13,6 +13,12 @@ To install the sleepwellbaby package use:
 uv sync
 ```
 
+You can then activate the environment using
+
+```{bash}
+source .venv/bin/activate
+```
+
 This will also install the nbstripout package, which will strip out the output of notebooks when committing to git.
 The nbstripout package should be installed automatically when running this cookiecutter template, to check if it is installed run:
 

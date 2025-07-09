@@ -1,0 +1,4 @@
+outs:
+- md5: 3c18d764cc7a3a970ca20bf217377c86
+  size: 225607
+  path: trained_model.bz2
