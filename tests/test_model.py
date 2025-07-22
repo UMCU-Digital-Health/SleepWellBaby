@@ -1,0 +1,50 @@
+
+import numpy as np
+import pytest
+from sklearn.base import BaseEstimator
+
+from sleepwellbaby.model import load_model
+from sleepwellbaby.model import return_y_pred
+
+
+def test_load_model_returns_expected_types():
+    model, model_support = load_model()
+    assert isinstance(model, BaseEstimator)
+    assert isinstance(model_support, dict)
+
+def test_return_y_pred():
+    probas = np.array([[0.2, 0.3, 0.4], [0.2, 0.4, 0.3], [0.4, 0.3, 0.2]]) 
+    classes = ["AS", "QS", "W"]
+
+    # Without W_threshold
+    preds = return_y_pred(probas, classes)
+    assert preds[0] == "W"
+    assert preds[1] == "QS"
+    assert preds[2] == "AS"
+
+    # With W_threshold
+    preds = return_y_pred(probas, 
+                          classes,
+                          W_label="W",     
+                          W_thresh=0.25)
+    assert preds[0] == "W"
+    assert preds[1] == "W"
+    assert preds[2] == "AS"
+
+    # invalid W_label
+    try:
+        return_y_pred(np.array([0.1, 0.1, 0.8]), classes, W_label="INVALID", W_thresh=0.5)
+    except Exception as e:
+        assert "W_label is expected to be in classes" in str(e)
+
+    # Inclomplete argument (only label or threshold provided)
+    probas = np.array([[0.1, 0.7, 0.2]])
+    try:
+        return_y_pred(probas, classes, W_label="W")
+    except Exception as e:
+        assert "W_label and W_thresh should be provided in conjunction" in str(e)
+    # Only W_thresh provided
+    try:
+        return_y_pred(probas, classes, W_thresh=0.5)
+    except Exception as e:
+        assert "W_label and W_thresh should be provided in conjunction" in str(e)

@@ -2,29 +2,41 @@ import joblib
 import numpy as np
 
 from . import package_root
+from sklearn.base import BaseEstimator
+from typing import Tuple, Dict, Any
+from typing import List, Tuple, Dict
 
 
-def load_model():
-    """Loads model files
+def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
+    """Load model files."""
 
-    Returns:
-        tuple: processed files TODO: correct
+    with open(package_root / "output" / "models" / "classifier.bz2", mode="rb") as f:
+        model: BaseEstimator = joblib.load(f)
+    with open(package_root / "output" / "models" / "trained_support_obj.pkl", mode="rb") as f:
+        model_support_dict: Dict[str, Any] = joblib.load(f)
+    return model, model_support_dict
+
+def process_prediction(
+    pred_proba: np.ndarray, 
+    classes: List[str]
+) -> Tuple[str, Dict[str, float]]:
     """
+    Process predicted probabilities.
 
-    with open(package_root / "output" / "models" / "trained_model.bz2", mode="rb") as f:
-        model = joblib.load(f)
+    Parameters
+    ----------
+    pred_proba : np.ndarray
+        Predicted probabilities per class, shape (1, n_classes).
+    classes : list of str
+        Class labels.
 
-    return model
-
-def process_prediction(pred_proba, classes):
-    """Process predicted probabilities
-
-    Args:
-        pred_proba (array-like): predicted probabilities per class
-        classes (list-like): class labels
-
-    Returns:
-        tuple: prediction, labeled probabilities
+    Returns
+    -------
+    tuple
+        prediction : str
+            Predicted class label (readable).
+        proba_dict : dict of str to float
+            Dictionary mapping readable class labels to their probabilities.
     """
     pred = return_y_pred(pred_proba, classes)
     readable_pred = {
@@ -32,31 +44,43 @@ def process_prediction(pred_proba, classes):
         "QS": "quiet_sleep",
         "W": "wake",
     }
-    pred = readable_pred[pred[0]]
-    # for i in readable_pred.values():
-    #     logs.log_lists[i].append(pred == i)
-    proba_dict = {readable_pred[k]: v for k, v in zip(classes, *pred_proba)}
-    return pred, proba_dict
+    pred_label = readable_pred[pred[0]]
+    proba_dict = {k: v for k, v in zip(classes, pred_proba[0])}
+    # return pred_label, proba_dict
+    return pred_label, pred
 
-def return_y_pred(probas, classes, W_label=None, W_thresh=None):
-    """Return predictions
+def return_y_pred(
+    probas: np.ndarray,
+    classes: List[str],
+    W_label: str = None,
+    W_thresh: float = None
+) -> List[str]:
+    """
+    Return predictions.
 
     If provided, predict `W_label` based on threshold,
-    and remaining labels based on highest probability
+    and remaining labels based on highest probability.
 
-    Args:
-        probas (array-like): probabilities per class
-        classes (list of str): names of classes
-        W_label (str): class that corresponds to Wake, defaults to None
-        W_thresh (float): threshold to predict `W_label`, defaults to None
+    Parameters
+    ----------
+    probas : np.ndarray
+        Probabilities per class, shape (n_samples, n_classes).
+    classes : list of str
+        Names of classes.
+    W_label : str, optional
+        Class that corresponds to Wake. Defaults to None.
+    W_thresh : float, optional
+        Threshold to predict `W_label`. Defaults to None.
 
-    Returns:
-        list of str: predicted classes
+    Returns
+    -------
+    list of str
+        Predicted classes.
     """
     if (W_label is None and W_thresh is not None) or (
         W_label is not None and W_thresh is None
     ):
-        raise Exception("W_label and W_tresh should be provided in conjunction")
+        raise Exception("W_label and W_thresh should be provided in conjunction")
     if W_label:
         if W_label not in classes:
             raise Exception("W_label is expected to be in classes")

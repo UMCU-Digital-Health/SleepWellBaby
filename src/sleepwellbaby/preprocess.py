@@ -159,3 +159,19 @@ def convert_to_features(df):
     # Calculate features
     df = calculate_features(df)
     return df
+
+def pipeline(payload, model_support_dict):
+    """Preprocess data to df to predict on
+
+    Args:
+        data (dict): containing parameter values, ref2h metrics and ref24h metrics
+
+    Returns:
+        pd.DataFrame: containing features
+    """
+    return (
+        dict_to_df(payload)
+        .pipe(ref24h_correction, payload)
+        .pipe(convert_to_features)
+        .reindex(columns=model_support_dict["Xcol"])
+    )
