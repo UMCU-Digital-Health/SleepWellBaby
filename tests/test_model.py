@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from sklearn.base import BaseEstimator
 
+from sleepwellbaby.data import example_payload
 from sleepwellbaby.model import load_model, process_prediction, return_y_pred, get_prediction
 
 
@@ -61,7 +62,7 @@ def test_process_prediction():
 
 def test_get_prediction():
     model, model_support_dict = load_model()
-    pred, proba_dict = get_prediction(model, model_support_dict)
+    pred, proba_dict = get_prediction(example_payload, model, model_support_dict)
     assert isinstance(pred, str)
     assert isinstance(proba_dict, dict)
     assert np.isclose(sum(proba_dict.values()), 1.0)

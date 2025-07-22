@@ -91,11 +91,11 @@ def return_y_pred(
         y_pred = [classes[i] for i in probas.argmax(axis=1)]
     return y_pred
 
-def get_prediction(model=None, model_support_dict=None):
+def get_prediction(payload, model=None, model_support_dict=None):
     if (model is None) | (model_support_dict is None):
         model, model_support_dict = load_model()
     
-    df = pipeline(example_payload, model_support_dict)
+    df = pipeline(payload, model_support_dict)
     pred_proba = model.predict_proba(df)
     pred, proba_dict = process_prediction(pred_proba, model.classes_)
     return pred, proba_dict
