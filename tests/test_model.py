@@ -3,8 +3,7 @@ import numpy as np
 import pytest
 from sklearn.base import BaseEstimator
 
-from sleepwellbaby.model import load_model
-from sleepwellbaby.model import return_y_pred
+from sleepwellbaby.model import load_model, process_prediction, return_y_pred
 
 
 def test_load_model_returns_expected_types():
@@ -39,12 +38,23 @@ def test_return_y_pred():
 
     # Inclomplete argument (only label or threshold provided)
     probas = np.array([[0.1, 0.7, 0.2]])
+
+    # Only W label provided
     try:
         return_y_pred(probas, classes, W_label="W")
     except Exception as e:
         assert "W_label and W_thresh should be provided in conjunction" in str(e)
-    # Only W_thresh provided
+
+    # Only W threshold provided
     try:
-        return_y_pred(probas, classes, W_thresh=0.5)
+        return_y_pred(probas, classes, W_thresh=0.3)
     except Exception as e:
         assert "W_label and W_thresh should be provided in conjunction" in str(e)
+
+def test_process_prediction():
+    probas = np.array([[0.1, 0.7, 0.2]])
+    classes = ["AS", "QS", "W"]
+    pred_label, proba_dict = process_prediction(probas, classes)
+    assert pred_label == "QS"
+    assert isinstance(proba_dict, dict)
+    assert set(proba_dict.keys()) == set(classes)

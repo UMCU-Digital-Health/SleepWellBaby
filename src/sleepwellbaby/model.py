@@ -39,15 +39,11 @@ def process_prediction(
             Dictionary mapping readable class labels to their probabilities.
     """
     pred = return_y_pred(pred_proba, classes)
-    readable_pred = {
-        "AS": "active_sleep",
-        "QS": "quiet_sleep",
-        "W": "wake",
-    }
-    pred_label = readable_pred[pred[0]]
+
+    pred_label = pred[0] 
     proba_dict = {k: v for k, v in zip(classes, pred_proba[0])}
     # return pred_label, proba_dict
-    return pred_label, pred
+    return pred_label, proba_dict
 
 def return_y_pred(
     probas: np.ndarray,
