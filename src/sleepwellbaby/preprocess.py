@@ -11,7 +11,9 @@ TIME_COL = "time_unix_epoch"
 PR_N_COL = "parameter_name"
 PR_V_COL = "parameter_value"
 PT_COL = "patient"
-lookback_windows = [60, 120, 240, 480]
+minimum_coverage_features = 0.5  # minimum percentage of data completeness in lookback window
+vitals_freq = 0.4  # Frequency of vital parameter data, Hz
+lookback_windows = [60, 120, 240, 480]  # lookback windows in seconds
 
 class StandardScalerWithoutFit(StandardScaler):
     def __init__(self, mean, scale):
@@ -31,40 +33,50 @@ def dict_to_df(data: dict) -> pd.DataFrame:
         to_df[k.split("param_")[1]] = v["values"]
     df = pd.DataFrame(to_df)
     # TODO: move comment
-    # NANs (coded as 0 or -1) are implicitely removed at normalization,
-    # as scale_and_correct only considers values of > 0.
+    # NANs (coded as 0 or -1) are implicitely removed in the rescale function
     return df
 
 def rescale(
-    v, ref24h_mean: float, ref24h_std: float
-):
-    """Scales values based on mean and standard deviation of past 24h.
-
-    Args:
-        v array-like: parameter values
-        ref24h_mean (float): mean of ref24h values of patient
-        ref24h_std (float): std of ref24h values of patient
-
-    Returns:
-        array-like: scaled parameter values
+    v: np.ndarray, ref24h_mean: float, ref24h_std: float
+) -> np.ndarray:
     """
-    # TODO add check that estimates whether scale isn't variance by accident?
-    # Remove 0s before scaling
-    v = v.astype(np.float)
+    Scale values based on the mean and standard deviation of the past 24 hours.
+
+    Parameters
+    ----------
+    v : np.ndarray
+        Array of parameter values.
+    ref24h_mean : float
+        Mean of ref24h values of the patient.
+    ref24h_std : float
+        Standard deviation of ref24h values of the patient.
+
+    Returns
+    -------
+    np.ndarray
+        Scaled parameter values.
+    """
+    v = v.astype(float)
     v[v <= 1e-10] = np.nan  # convert 0 and -1 to nan
 
     scaler = StandardScalerWithoutFit(ref24h_mean, ref24h_std)
     return scaler.transform(v.reshape(-1, 1))
 
-def ref24h_correction(df: pd.DataFrame, data: dict):
-    """Scales and corrects data based on ref24h and ref2h values.
+def ref24h_correction(df: pd.DataFrame, data: dict) -> pd.DataFrame:
+    """
+    Scales and corrects data based on ref24h and ref2h values.
 
-    Args:
-        df (pd.DataFrame): containing vital parameter values
-        data (dict): payload containing median values for ref24h and ref2h of each parameter
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing vital parameter values.
+    data : dict
+        Payload containing median values for ref24h and ref2h of each parameter.
 
-    Returns:
-        pd.DataFrame: containing median-corrected parameter values
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing scaled parameter values based on personal reference values.
     """
     for x in df.columns:
         if x == 'OS':
@@ -75,22 +87,30 @@ def ref24h_correction(df: pd.DataFrame, data: dict):
                 v=df[x].values,
                 ref24h_mean=values["ref24h_mean"],
                 ref24h_std=values["ref24h_std"],
-        )
+            )
     return df
 
-def calculate_features(df_windows, n_jobs=0):
-    """Calculate features for provided window-dataframe
+def calculate_features(
+    df_windows: pd.DataFrame, n_jobs: int = 0
+) -> pd.DataFrame:
+    """
+    Calculate features for provided window-dataframe.
 
-    Args:
-        df_windows (pd.DataFrame): containing columns:
-            "id": tuple(group id, time of window)
-            `pr_n_col`: parameter name of value
-            `pr_v_col`: parameter value of row
-            `time_col`: time of row
-        n_jobs (int, optional): n_jobs during extract_features. Defaults to 0.
+    Parameters
+    ----------
+    df_windows : pd.DataFrame
+        DataFrame containing columns:
+            "id": tuple (group id, time of window), used for groupby
+            PR_N_COL: parameter name of value
+            PR_V_COL: parameter value of row
+            TIME_COL: time of row
+    n_jobs : int, optional
+        Number of jobs to run in parallel during extract_features. Defaults to 0.
 
-    Returns:
-        pd.DataFrame: calculated features
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with calculated features.
     """
     warnings.simplefilter("ignore")
     to_calculate = {
@@ -104,8 +124,10 @@ def calculate_features(df_windows, n_jobs=0):
     past_dfs = []
     for far_past in lookback_windows:
         df_i = df_windows.copy()
-        # add window/past indicator to parameter name (e.g. HR__0_60)
+
+        # add window lookback indicator to parameter name (e.g. HR__0_60)
         df_i[PR_N_COL] = df_i[PR_N_COL] + "__0_" + str(far_past)
+
         # remove rows from df_i where time of row falls outside of window
         mask = ([i[1] for i in df_i["id"]] - df_i[TIME_COL]) < far_past
         df_i = df_i[mask]
@@ -126,9 +148,13 @@ def calculate_features(df_windows, n_jobs=0):
         # to support feature calculation (i.e. too short length)
         # Criterium = minimally 50% coverage in all of the windows
         far_past = int(col.split("_")[3])
-        df_features = df_features[df_features[col] >= int(far_past / 2.5 * 0.5)]
+        # Only filter if there are any rows left after filtering, otherwise keep all
+        mask = df_features[col] >= int(far_past * vitals_freq * minimum_coverage_features)
+        if mask.any():
+            df_features = df_features[mask]
         # Drop length column
         df_features = df_features.drop(columns=[col])
+
     # Drop sum_values columns, as these are a derivative of __mean for our complete data
     df_features = df_features.drop(
         columns=[i for i in df_features.columns if re.search("__sum_values$", i)]
@@ -136,17 +162,32 @@ def calculate_features(df_windows, n_jobs=0):
 
     # unpack id
     df_features[[PT_COL, TIME_COL]] = [list(i) for i in df_features.index]
+    df_features = df_features.reset_index(drop=True)
+
+    # If the dataframe is empty after filtering, return a single row of NaNs with correct columns
+    if df_features.shape[0] == 0:
+        nan_row = pd.DataFrame(
+            [[np.nan] * len(df_features.columns)],
+            columns=df_features.columns
+        )
+        return nan_row
+
     return df_features
 
 
 def convert_to_features(df):
-    """Calculates features from parameter values
+    """
+    Calculates features from parameter values.
 
-    Args:
-        df (pd.DataFrame): containing median-corrected parameter values
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing rescaled parameter values.
 
-    Returns:
-        pd.DataFrame: containing features
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing extracted features.
     """
     # Stack dataframe
     df.columns = pd.MultiIndex.from_tuples([(PR_V_COL, c) for c in df.columns])
@@ -160,14 +201,24 @@ def convert_to_features(df):
     df = calculate_features(df)
     return df
 
-def pipeline(payload, model_support_dict):
-    """Preprocess data to df to predict on
+def pipeline(
+    payload: dict, 
+    model_support_dict: dict
+) -> pd.DataFrame:
+    """
+    Preprocess data to DataFrame to predict on.
 
-    Args:
-        data (dict): containing parameter values, ref2h metrics and ref24h metrics
+    Parameters
+    ----------
+    payload : dict
+        Dictionary containing parameter values, ref2h metrics, and ref24h metrics.
+    model_support_dict : dict
+        Dictionary containing model meta information, including names of feature columns.
 
-    Returns:
-        pd.DataFrame: containing features
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing extracted features, ready for prediction.
     """
     return (
         dict_to_df(payload)

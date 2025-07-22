@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from sklearn.base import BaseEstimator
 
-from sleepwellbaby.model import load_model, process_prediction, return_y_pred
+from sleepwellbaby.model import load_model, process_prediction, return_y_pred, get_prediction
 
 
 def test_load_model_returns_expected_types():
@@ -58,3 +58,16 @@ def test_process_prediction():
     assert pred_label == "QS"
     assert isinstance(proba_dict, dict)
     assert set(proba_dict.keys()) == set(classes)
+
+def test_get_prediction():
+    model, model_support_dict = load_model()
+    pred, proba_dict = get_prediction(model, model_support_dict)
+    assert isinstance(pred, str)
+    assert isinstance(proba_dict, dict)
+    assert np.isclose(sum(proba_dict.values()), 1.0)
+    assert set(proba_dict.keys()) == set(model.classes_)
+    example_payload_prediction = np.array(list(proba_dict.values()), dtype='float64')
+    example_payload_expectation = np.array([0.5615941683425135, 
+                                            0.20849384661464576,
+                                            0.22991198504284074,])
+    assert np.isclose(example_payload_expectation, example_payload_prediction).all()

@@ -6,6 +6,8 @@ from sklearn.base import BaseEstimator
 from typing import Tuple, Dict, Any
 from typing import List, Tuple, Dict
 
+from sleepwellbaby.data import example_payload
+from sleepwellbaby.preprocess import pipeline
 
 def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
     """Load model files."""
@@ -88,3 +90,12 @@ def return_y_pred(
     else:
         y_pred = [classes[i] for i in probas.argmax(axis=1)]
     return y_pred
+
+def get_prediction(model=None, model_support_dict=None):
+    if (model is None) | (model_support_dict is None):
+        model, model_support_dict = load_model()
+    
+    df = pipeline(example_payload, model_support_dict)
+    pred_proba = model.predict_proba(df)
+    pred, proba_dict = process_prediction(pred_proba, model.classes_)
+    return pred, proba_dict
