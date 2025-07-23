@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
         python-version: '3.8'
 
     - name: Install dependencies
-      run: uv sync
+      run: uv sync --all-extras --dev
 
     - name: Running Unit tests
       run: uv run pytest tests/ --doctest-modules --cov=src --cov-report=xml
