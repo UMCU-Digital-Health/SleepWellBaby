@@ -7,7 +7,7 @@ from typing import Tuple, Dict, Any
 from typing import List, Tuple, Dict
 
 from sleepwellbaby.eligibility import check_eligibility
-from sleepwellbaby.preprocess import replace_today_placeholder, pipeline
+from sleepwellbaby.preprocess import pipeline
 
 def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
     """Load model files."""
@@ -95,7 +95,6 @@ def get_prediction(payload, model=None, model_support_dict=None):
     if (model is None) | (model_support_dict is None):
         model, model_support_dict = load_model()
 
-    payload = replace_today_placeholder(payload)
     eligible = check_eligibility(payload)
     
     if eligible:
