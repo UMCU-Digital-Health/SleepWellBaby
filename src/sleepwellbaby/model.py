@@ -6,8 +6,8 @@ from sklearn.base import BaseEstimator
 from typing import Tuple, Dict, Any
 from typing import List, Tuple, Dict
 
-from sleepwellbaby.data import example_payload
-from sleepwellbaby.preprocess import pipeline
+from sleepwellbaby.eligibility import check_eligibility
+from sleepwellbaby.preprocess import replace_today_placeholder, pipeline
 
 def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
     """Load model files."""
@@ -94,8 +94,17 @@ def return_y_pred(
 def get_prediction(payload, model=None, model_support_dict=None):
     if (model is None) | (model_support_dict is None):
         model, model_support_dict = load_model()
+
+    payload = replace_today_placeholder(payload)
+    eligible = check_eligibility(payload)
     
-    df = pipeline(payload, model_support_dict)
-    pred_proba = model.predict_proba(df)
-    pred, proba_dict = process_prediction(pred_proba, model.classes_)
+    if eligible:
+        df = pipeline(payload, model_support_dict)
+        pred_proba = model.predict_proba(df)
+        pred, proba_dict = process_prediction(pred_proba, model.classes_)
+    else:
+        pred = 'ineligible'
+        proba_dict =  {'AS': -1,
+                       'QS': -1,
+                       'W': -1}       
     return pred, proba_dict

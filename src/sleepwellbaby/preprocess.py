@@ -1,3 +1,4 @@
+from datetime import date
 import re
 import warnings
 
@@ -22,6 +23,30 @@ class StandardScalerWithoutFit(StandardScaler):
         self.mean_ = mean
         self.scale_ = _handle_zeros_in_scale(scale)
         self.n_features_in_ = 1
+
+def replace_today_placeholder(d: dict) -> dict:
+    """Fill out current date placeholder in a dictionary.
+
+    This function recursively searches through the input dictionary and replaces any value equal to
+    '@today' with the current date in 'YYYY-MM-DD' format.
+
+    Parameters
+    ----------
+    d : dict
+        Input dictionary to process.
+
+    Returns
+    -------
+    dict
+        Dictionary with all '@today' values replaced by the current date.
+    """
+    for k, v in d.items():
+        if isinstance(v, dict):
+            d[k] = replace_today_placeholder(d[k])
+        if v == "@today":
+            d[k] = date.today().strftime(r"%Y-%m-%d")
+    return d
+
 
 def dict_to_df(data: dict) -> pd.DataFrame:
     """Extract vital parameters from payload (json) to dataframe."""
@@ -194,7 +219,7 @@ def convert_to_features(df):
     df = df.stack().reset_index()
     df = df.rename(columns={"level_0": TIME_COL, "level_1": PR_N_COL})
     # Add a timestamp to each row, assumes last value in value lists to be newest
-    df[TIME_COL] = df[TIME_COL] * 2.5 + 2.5
+    df[TIME_COL] = df[TIME_COL] / vitals_freq + 1./vitals_freq
     # Add ids as expected by `calculate_features`
     df["id"] = [(1, int(max(lookback_windows))) for _ in range(df.shape[0])]
     # Calculate features
