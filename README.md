@@ -41,3 +41,10 @@ rsconnect deploy dash --server https://rsc.ds.umcutrecht.nl/ --api-key <(user sp
 
 ## Documentation
 Dataset and model information can be found in the [dataset card](docs/dataset_card.md) and [model card](docs/model_card.md), respectively.
+
+## TODO:
+* add model card
+* add dataset card
+* add example for signalbase and generic
+* add license
+* fix test environment on github "ValueError: node array from the pickle has an incompatible dtype:" from unpickling
