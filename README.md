@@ -42,6 +42,26 @@ rsconnect deploy dash --server https://rsc.ds.umcutrecht.nl/ --api-key <(user sp
 ## Documentation
 Dataset and model information can be found in the [dataset card](docs/dataset_card.md) and [model card](docs/model_card.md), respectively.
 
+e
+
+## Citation instructions
+Reference should be made to the sleep-well baby paper when using this software.
+
+@article{10.1093/sleep/zsac143,
+    author = {Sentner, Thom and Wang, Xiaowan and de Groot, Eline R and van Schaijk, Lieke and Tataranno, Maria Luisa and Vijlbrief, Daniel C and Benders, Manon J N L and Bartels, Richard and Dudink, Jeroen},
+    title = {The Sleep Well Baby project: an automated real-time sleep–wake state prediction algorithm in preterm infants},
+    journal = {Sleep},
+    volume = {45},
+    number = {10},
+    pages = {zsac143},
+    year = {2022},
+    month = {06},
+    issn = {0161-8105},
+    doi = {10.1093/sleep/zsac143},
+    url = {https://doi.org/10.1093/sleep/zsac143},
+    eprint = {https://academic.oup.com/sleep/article-pdf/45/10/zsac143/45986688/zsac143.pdf},
+}
+
 ## TODO:
 * add model card
 * add dataset card
