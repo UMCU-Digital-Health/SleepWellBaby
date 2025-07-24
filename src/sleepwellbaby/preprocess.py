@@ -145,6 +145,7 @@ def calculate_features(df_windows: pd.DataFrame, n_jobs: int = 0) -> pd.DataFram
         column_value=PR_V_COL,
         n_jobs=n_jobs,
         default_fc_parameters=to_calculate,
+        disable_progressbar=True,
     )
     for col in [i for i in df_features.columns if re.search("__length$", i)]:
         # Filter out rows that do not have enough measurements
