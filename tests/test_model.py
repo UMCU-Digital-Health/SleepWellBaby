@@ -1,10 +1,14 @@
 
 import numpy as np
-import pytest
 from sklearn.base import BaseEstimator
 
-from sleepwellbaby.data import get_example_payload 
-from sleepwellbaby.model import load_model, process_prediction, return_y_pred, get_prediction
+from sleepwellbaby.data import get_example_payload
+from sleepwellbaby.model import (
+    get_prediction,
+    load_model,
+    process_prediction,
+    return_y_pred,
+)
 
 
 def test_load_model_returns_expected_types():
@@ -13,7 +17,7 @@ def test_load_model_returns_expected_types():
     assert isinstance(model_support, dict)
 
 def test_return_y_pred():
-    probas = np.array([[0.2, 0.3, 0.4], [0.2, 0.4, 0.3], [0.4, 0.3, 0.2]]) 
+    probas = np.array([[0.2, 0.3, 0.4], [0.2, 0.4, 0.3], [0.4, 0.3, 0.2]])
     classes = ["AS", "QS", "W"]
 
     # Without W_threshold
@@ -23,9 +27,9 @@ def test_return_y_pred():
     assert preds[2] == "AS"
 
     # With W_threshold
-    preds = return_y_pred(probas, 
+    preds = return_y_pred(probas,
                           classes,
-                          W_label="W",     
+                          W_label="W",
                           W_thresh=0.25)
     assert preds[0] == "W"
     assert preds[1] == "W"
@@ -69,7 +73,7 @@ def test_get_prediction():
     assert np.isclose(sum(proba_dict.values()), 1.0)
     assert set(proba_dict.keys()) == set(model.classes_)
     example_payload_prediction = np.array(list(proba_dict.values()), dtype='float64')
-    example_payload_expectation = np.array([0.5615941683425135, 
+    example_payload_expectation = np.array([0.5615941683425135,
                                             0.20849384661464576,
                                             0.22991198504284074,])
     assert np.isclose(example_payload_expectation, example_payload_prediction).all()

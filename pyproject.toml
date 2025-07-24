@@ -54,3 +54,4 @@ select = [
     "C90",  # mccabe complexity
     "I",  # isort
 ]
+ignore = ["E501",]

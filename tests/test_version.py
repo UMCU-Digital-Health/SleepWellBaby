@@ -1,7 +1,7 @@
-import pytest
-
 import toml
-from sleepwellbaby import version, package_root
+
+from sleepwellbaby import package_root, version
+
 
 def test_version_matches_pyproject():
     pyproject_path = package_root / "pyproject.toml"

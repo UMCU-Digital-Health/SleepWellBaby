@@ -11,13 +11,16 @@ TIME_COL = "time_unix_epoch"
 PR_N_COL = "parameter_name"
 PR_V_COL = "parameter_value"
 PT_COL = "patient"
-minimum_coverage_features = 0.5  # minimum percentage of data completeness in lookback window
+minimum_coverage_features = (
+    0.5  # minimum percentage of data completeness in lookback window
+)
 vitals_freq = 0.4  # Frequency of vital parameter data, Hz
 lookback_windows = [60, 120, 240, 480]  # lookback windows in seconds
 
+
 class StandardScalerWithoutFit(StandardScaler):
     def __init__(self, mean, scale):
-        super().__init__(copy=True, with_mean=True, with_std=True) 
+        super().__init__(copy=True, with_mean=True, with_std=True)
 
         self.mean_ = mean
         self.scale_ = _handle_zeros_in_scale(scale)
@@ -37,9 +40,8 @@ def dict_to_df(data: dict) -> pd.DataFrame:
     # NANs (coded as 0 or -1) are implicitely removed in the rescale function
     return df
 
-def rescale(
-    v: np.ndarray, ref24h_mean: float, ref24h_std: float
-) -> np.ndarray:
+
+def rescale(v: np.ndarray, ref24h_mean: float, ref24h_std: float) -> np.ndarray:
     """
     Scale values based on the mean and standard deviation of the past 24 hours.
 
@@ -63,6 +65,7 @@ def rescale(
     scaler = StandardScalerWithoutFit(ref24h_mean, ref24h_std)
     return scaler.transform(v.reshape(-1, 1))
 
+
 def ref24h_correction(df: pd.DataFrame, data: dict) -> pd.DataFrame:
     """
     Scales and corrects data based on ref24h and ref2h values.
@@ -80,9 +83,9 @@ def ref24h_correction(df: pd.DataFrame, data: dict) -> pd.DataFrame:
         DataFrame containing scaled parameter values based on personal reference values.
     """
     for x in df.columns:
-        if x == 'OS':
+        if x == "OS":
             continue
-        elif x in ['HR', 'RR']:
+        elif x in ["HR", "RR"]:
             values = data[f"param_{x}"]
             df[x] = rescale(
                 v=df[x].values,
@@ -91,9 +94,8 @@ def ref24h_correction(df: pd.DataFrame, data: dict) -> pd.DataFrame:
             )
     return df
 
-def calculate_features(
-    df_windows: pd.DataFrame, n_jobs: int = 0
-) -> pd.DataFrame:
+
+def calculate_features(df_windows: pd.DataFrame, n_jobs: int = 0) -> pd.DataFrame:
     """
     Calculate features for provided window-dataframe.
 
@@ -150,7 +152,9 @@ def calculate_features(
         # Criterium = minimally 50% coverage in all of the windows
         far_past = int(col.split("_")[3])
         # Only filter if there are any rows left after filtering, otherwise keep all
-        mask = df_features[col] >= int(far_past * vitals_freq * minimum_coverage_features)
+        mask = df_features[col] >= int(
+            far_past * vitals_freq * minimum_coverage_features
+        )
         if mask.any():
             df_features = df_features[mask]
         # Drop length column
@@ -168,8 +172,7 @@ def calculate_features(
     # If the dataframe is empty after filtering, return a single row of NaNs with correct columns
     if df_features.shape[0] == 0:
         nan_row = pd.DataFrame(
-            [[np.nan] * len(df_features.columns)],
-            columns=df_features.columns
+            [[np.nan] * len(df_features.columns)], columns=df_features.columns
         )
         return nan_row
 
@@ -195,17 +198,15 @@ def convert_to_features(df):
     df = df.stack().reset_index()
     df = df.rename(columns={"level_0": TIME_COL, "level_1": PR_N_COL})
     # Add a timestamp to each row, assumes last value in value lists to be newest
-    df[TIME_COL] = df[TIME_COL] / vitals_freq + 1./vitals_freq
+    df[TIME_COL] = df[TIME_COL] / vitals_freq + 1.0 / vitals_freq
     # Add ids as expected by `calculate_features`
     df["id"] = [(1, int(max(lookback_windows))) for _ in range(df.shape[0])]
     # Calculate features
     df = calculate_features(df)
     return df
 
-def pipeline(
-    payload: dict, 
-    model_support_dict: dict
-) -> pd.DataFrame:
+
+def pipeline(payload: dict, model_support_dict: dict) -> pd.DataFrame:
     """
     Preprocess data to DataFrame to predict on.
 

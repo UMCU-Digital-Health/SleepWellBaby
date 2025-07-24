@@ -9,9 +9,12 @@ from jsonschema import FormatChecker
 from werkzeug.exceptions import MethodNotAllowed
 
 from sleepwellbaby import version
-from sleepwellbaby.dashboard.data_structures import args_pred_other, args_pred_pr, response_pred
-from sleepwellbaby.model import load_model, get_prediction
-
+from sleepwellbaby.dashboard.data_structures import (
+    args_pred_other,
+    args_pred_pr,
+    response_pred,
+)
+from sleepwellbaby.model import get_prediction, load_model
 
 model, model_support_dict = load_model()
 
@@ -21,13 +24,14 @@ app = Flask(__name__)
 # Allow dates not to strictly adhere to ISO8601
 # https://github.com/noirbizarre/flask-restplus/issues/603#issuecomment-472367498
 format_checker = FormatChecker()
+
+
 # fmt: on
 @format_checker.checks("date", ValueError)  # noqa: E302
 def lenient_date_check(value):
     """Check if input value is valid date"""
     datetime.datetime.strptime(value, "%Y-%m-%d")
     return True
-
 
 
 api = Api(
@@ -70,9 +74,9 @@ class DoPrediction(Resource):
         prediction, pred_proba = get_prediction(data, model, model_support_dict)
         result = {
             "prediction": prediction,
-            "AS": pred_proba['AS'],
-            "QS": pred_proba['QS'],
-            "W": pred_proba['W'],
+            "AS": pred_proba["AS"],
+            "QS": pred_proba["QS"],
+            "W": pred_proba["W"],
         }
 
         return result, 200

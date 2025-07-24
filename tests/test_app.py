@@ -1,6 +1,6 @@
-import pytest
 
 import json
+
 from sleepwellbaby.dashboard.app import app
 from sleepwellbaby.data import get_example_payload
 
@@ -9,7 +9,7 @@ def test_predict_endpoint():
     client = app.test_client()
 
     # Test using example payload
-   
+
     payload = get_example_payload()
     payload["observation_date"] = payload['birth_date']  # Ensure observation_date is a valid string
 

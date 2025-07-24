@@ -4,16 +4,25 @@ import pandas as pd
 from sleepwellbaby import logger
 from sleepwellbaby.preprocess import lookback_windows, vitals_freq
 
-
 pma_range = [28, 34]  # weeks, lo <= PMA < hi
 reference_ranges = {
-    "param_HR": {'mean': {"min": 100, "max": 220},
-                 'std': {"min": 0, "max": 25,}}, 
-    "param_RR": {'mean': {"min": 20, "max": 90},
-                 'std': {"min": 0, "max": 30,}},
-    "param_OS": {'mean': {"min": 85, "max": 100},
-                 'std': {"min": 0, "max": 10}}
+    "param_HR": {
+        "mean": {"min": 100, "max": 220},
+        "std": {
+            "min": 0,
+            "max": 25,
+        },
+    },
+    "param_RR": {
+        "mean": {"min": 20, "max": 90},
+        "std": {
+            "min": 0,
+            "max": 30,
+        },
+    },
+    "param_OS": {"mean": {"min": 85, "max": 100}, "std": {"min": 0, "max": 10}},
 }
+
 
 def data_eligibility(payload: dict) -> bool:
     """
@@ -28,6 +37,7 @@ def data_eligibility(payload: dict) -> bool:
     Returns:
         bool: True if data completeness is sufficient, False otherwise.
     """
+
     def relative_n_nans(v: list) -> float:
         return np.mean([(i <= 0) for i in v])
 
@@ -44,11 +54,9 @@ def data_eligibility(payload: dict) -> bool:
 def age_eligibility(payload: dict) -> bool:
     """Check eligibililty based on postmenstrual age on the date of observation."""
     birth_date = pd.to_datetime(payload["birth_date"], format="%Y-%m-%d")
-    observation_date =  payload["observation_date"]
-    chronological_age = birth_date - pd.DateOffset(
-        days=payload["gestation_period"]
-    )
-    
+    observation_date = payload["observation_date"]
+    chronological_age = birth_date - pd.DateOffset(days=payload["gestation_period"])
+
     if observation_date is None:
         observation_date = pd.Timestamp.today()
     else:
@@ -57,33 +65,31 @@ def age_eligibility(payload: dict) -> bool:
             raise ValueError("Observation date cannot be before birth date.")
 
     pma = (observation_date - chronological_age).days / 7
-    
+
     return (pma_range[0] <= pma) & (pma < pma_range[1])
-
-
 
 
 def reference_eligibility(payload: dict) -> bool:
     """Eligibility check of reference values"""
 
-    keys_mean = ["ref2h_mean", "ref24h_mean"] 
+    keys_mean = ["ref2h_mean", "ref24h_mean"]
     keys_std = ["ref2h_std", "ref24h_std"]
     for k, v in payload.items():
         if not k.startswith("param_"):
             continue
-        for stat, stat_range in reference_ranges[k].items(): 
-            if stat=='std':
+        for stat, stat_range in reference_ranges[k].items():
+            if stat == "std":
                 # lower bound not included, upper include
                 if any(v[i] <= stat_range["min"] for i in keys_std):
                     return False
                 if any(v[i] > stat_range["max"] for i in keys_std):
                     return False
-            elif stat=='mean':
+            elif stat == "mean":
                 # lower and upper bound included
                 if any(v[i] < stat_range["min"] for i in keys_mean):
                     return False
                 if any(v[i] > stat_range["max"] for i in keys_mean):
-                    return False   
+                    return False
     return True
 
 

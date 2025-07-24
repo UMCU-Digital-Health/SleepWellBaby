@@ -1,6 +1,3 @@
-import pytest
-import json
-
 import pandas as pd
 
 from sleepwellbaby.data import get_example_payload
@@ -23,5 +20,4 @@ def test_get_example_payload_success(monkeypatch):
 def test_example_payload_dates():
     payload = get_example_payload()
     assert str(payload['birth_date']) == str(pd.Timestamp.today().date())
-    assert payload['observation_date'] == None
-    
+    assert payload['observation_date'] is None

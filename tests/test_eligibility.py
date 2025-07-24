@@ -1,11 +1,13 @@
 
-import pytest
-
 import numpy as np
 import pandas as pd
+import pytest
 
-from sleepwellbaby.eligibility import age_eligibility, data_eligibility, reference_eligibility
-
+from sleepwellbaby.eligibility import (
+    age_eligibility,
+    data_eligibility,
+    reference_eligibility,
+)
 
 
 def test_data_eligibility():
@@ -102,7 +104,7 @@ def test_age_eligibility():
         "gestation_period": 231,
         "observation_date": None
     }
-    assert age_eligibility(payload) is True 
+    assert age_eligibility(payload) is True
 
 
 def test_reference_eligibility():
@@ -132,7 +134,7 @@ def test_reference_eligibility():
     # Mean above max for param_HR
     payload = {
         "param_HR": {
-            "ref2h_mean": 110,  
+            "ref2h_mean": 110,
             "ref24h_mean": 221, # max is 220
             "ref2h_std": 10,
             "ref24h_std": 15
@@ -174,7 +176,7 @@ def test_reference_eligibility():
             "ref2h_mean": 70,
             "ref24h_mean": 70,
             "ref2h_std": 10,
-            "ref24h_std": 10, 
+            "ref24h_std": 10,
         },
         "param_OS": {
             "ref2h_mean": 95,

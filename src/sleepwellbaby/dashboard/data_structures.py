@@ -2,8 +2,8 @@ from itertools import product
 
 from flask_restx.fields import Date, Float, Integer, List, String
 
-from sleepwellbaby.data import get_example_payload
 from sleepwellbaby import version
+from sleepwellbaby.data import get_example_payload
 
 
 def make_required_and_add_example(d, exmpl_data):
@@ -52,9 +52,7 @@ args_pred_other = {
     "gestation_period": Integer(),
     "observation_date": Date(nullable=True),
 }
-args_pred_other = make_required_and_add_example(
-    args_pred_other, example_payload
-)
+args_pred_other = make_required_and_add_example(args_pred_other, example_payload)
 
 # NOTE Response documented in README
 response_pred = {
