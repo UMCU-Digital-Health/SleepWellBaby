@@ -22,10 +22,6 @@ The dataset is in English.
 
 ### Data Instances
 
-The input data 
-
-Provide an JSON-formatted example and brief description of a typical instance in the dataset. If available, provide a link to further examples.
-
 #### Sleep stage annotations
 This dataset contains sleep stage annotations recorded in an Excel file using a long format. Each row represents a time point during the observation period. The columns include:
 - Time: Minutes elapsed since the start of the observations.
@@ -83,12 +79,26 @@ Input data for inference is structured as follows:
 ```
 
 ### Data Fields
+The most important datafield are provided below
 
-List and describe the fields present in the dataset. Mention their data type, and whether they are used as input or output in any of the tasks the dataset currently supports. If the data has span indices, describe their attributes, such as whether they are at the character level or word level, whether they are contiguous or not, etc. If the datasets contains example IDs, state whether they have an inherent meaning, such as a mapping to other datasets or pointing to relationships between data points.
+#### Sleep stage observations
+- `NICU room`: int, neonatal ward identifier `1`
+- `Location bed`: int, bed location identifier `7`
+- `Type of crib`: string describing crib`closed incubator`
+- `Respiratory support`: string describing type of respiratory support `nCPAP`
+- `Gender`: string `M` or `F`
+- `PMA at observation`: string with PMA in weeks plus days `30+3`
+- `Date`: date of observation `01-01-2001`
+- `Starting time`: timestamp, starting time of observation `8:05`
+- `Ending time`: timestamp, ending time of observation `11:05`
+- `Time`: timedelta, time since starting time (hh:mm:ss) `1:30:00`
+- `Sleep state`: string with observed sleep state `'AS'`, `'IS'`, `'QS'`, `'W'` or `null`
+- `Confidence score`: int with quality of observation `-1`, `0`, `1` or `null`
 
-- `example_field`: description of `example_field`
-
-Note that the descriptions can be initialized with the **Show Markdown Data Fields** output of the [Datasets Tagging app](https://huggingface.co/spaces/huggingface/datasets-tagging), you will then only need to refine the generated descriptions.
+#### Vital parameter data
+- `Export signal`: string with name of the parameter `PM_DATA_HEART_RATE`
+- `Start of data`: datetime (custom format) `01-01-2001 12:00:00.000`
+- `null`: float with parameter value `154.0000`
 
 ### Data Splits
 The dataset consists of training ($N = 37$) and a validation set ($N = 9$).
@@ -99,29 +109,20 @@ For model training a grouped nested cross-validation procedure was used, where g
 
 ### Curation Rationale
 
-What need motivated the creation of this dataset? What are some of the reasons underlying the major choices involved in putting it together?
+The dataset was created for the purpose of training and evaluation (machine-learning) models for monitoring sleep stages in preterm infants.
 
 ### Source Data
 
-This section describes the source data (e.g. news text and headlines, social media posts, translated sentences,...)
+Data comes from bedside monitors (vital parameter data) and electronic health records (patient characteristics).
 
 #### Initial Data Collection and Normalization
 
-Describe the data collection process. Describe any criteria for data selection or filtering. List any key words or search terms used. If possible, include runtime information for the collection process.
+Bedside monitor data was collected using BedBase. EHR data comes from Metavision.
 
-If data was collected from other pre-existing datasets, link to source here and to their [Hugging Face version](https://huggingface.co/datasets/dataset_name).
+#### Who are the source data producers?
 
-If the data was modified or normalized after being collected (e.g. if the data is word-tokenized), describe the process and the tools used.
-
-#### Who are the source language producers?
-
-State whether the data was produced by humans or machine generated. Describe the people or systems who originally created the data.
-
-If available, include self-reported demographic or identity information for the source data creators, but avoid inferring this information. Instead state that this information is unknown. See [Larson 2017](https://www.aclweb.org/anthology/W17-1601.pdf) for using identity categories as a variables, particularly gender.
-
-Describe the conditions under which the data was created (for example, if the producers were crowdworkers, state what platform was used, or if the data was found, what website the data was found on). If compensation was provided, include that information here.
-
-Describe other people represented or mentioned in the data. Where possible, link to references for the information.
+Vital parameter data is machine generated (bedside monitor).
+Data from the EHR (patient characteristics) is filled in by humans, notably healthcare professionals.
 
 ### Annotations
 
