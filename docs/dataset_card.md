@@ -103,8 +103,6 @@ The most important datafield are provided below
 ### Data Splits
 The dataset consists of training ($N = 37$) and a validation set ($N = 9$).
 
-For model training a grouped nested cross-validation procedure was used, where grouping took place on patient id.
-
 ## Dataset Creation
 
 ### Curation Rationale
