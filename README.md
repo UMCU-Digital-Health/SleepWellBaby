@@ -2,47 +2,30 @@
 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
+<img src="https://cdn.worldvectorlogo.com/logos/umc-utrecht-1.svg" alt="UMCU Logo" width="200"/>
+
 Author: Richard Bartels
 Email: r.t.bartels-6@umcutrecht.nl
 
-## Installation
+## Introduction
+This repository contains code to run the sleep-well baby model that can classify sleep stages in 
+preterm infants based on vital signs. It only contains code for model inference, not for training.
 
-To install the sleepwellbaby package use:
+## Getting started
+### Installation
 
-```{bash}
+The easiest way to install the `sleepwellbaby` package is to 
+to use the package manager [uv](https://docs.astral.sh/uv/), a modern Python package manager that simplifies dependency management and ensures reproducibility:
+
+```bash
 uv sync
 ```
 
-You can then activate the environment using
-
-```{bash}
-source .venv/bin/activate
-```
-
-This will also install the nbstripout package, which will strip out the output of notebooks when committing to git.
-The nbstripout package should be installed automatically when running this cookiecutter template, to check if it is installed run:
-
-```{bash}
-nbstripout --status
-```
-
-If it is not installed, you can install it manually by running:
-
-```{bash}
-nbstripout --install
-```
-
-## Deploying to PositConnect
-
-To deploy to PositConnect install rsconnect (`pip install rsconnect-python`) and run (in case of a dash app):
-```{bash}
-rsconnect deploy dash --server https://rsc.ds.umcutrecht.nl/ --api-key <(user specific key)> --entrypoint run.app:app .
-```
+### Starterkit
+An example of how to run this code can be found in [notebooks/example.ipynb](notebooks/example.ipynb)
 
 ## Documentation
 Dataset and model information can be found in the [dataset card](docs/dataset_card.md) and [model card](docs/model_card.md), respectively.
-
-e
 
 ## Citation instructions
 Reference should be made to the sleep-well baby paper when using this software.
@@ -61,10 +44,3 @@ Reference should be made to the sleep-well baby paper when using this software.
     url = {https://doi.org/10.1093/sleep/zsac143},
     eprint = {https://academic.oup.com/sleep/article-pdf/45/10/zsac143/45986688/zsac143.pdf},
 }
-
-## TODO:
-* add model card
-* add dataset card
-* add example for signalbase and generic
-* add license
-* fix test environment on github "ValueError: node array from the pickle has an incompatible dtype:" from unpickling

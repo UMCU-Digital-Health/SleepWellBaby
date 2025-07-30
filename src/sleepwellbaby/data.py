@@ -1,5 +1,5 @@
-import json
 import datetime
+import json
 
 import importlib_resources
 import numpy as np
@@ -86,7 +86,7 @@ def compute_reference_values(
     tolerance_24: float = 0.05
 ) -> pd.DataFrame:
     """
-    Computes rolling mean and standard deviation for heart rate (HR), respiration rate (RESP), 
+    Computes rolling mean and standard deviation for heart rate (HR), respiration rate (RESP),
     and oxygen saturation (SpO2) over 2-hour and 24-hour windows.
 
     Parameters:
