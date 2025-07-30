@@ -1,6 +1,9 @@
-# SleepWellBaby
+# Sleep Well Baby: sleep stage prediction
 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fgithub.com%2FUMCU-Digital-Health%2FSleepWellBaby%2Fblob%2Fmain%2Fpyproject.toml)
+[![Unit test](https://github.com/UMCU-Digital-Health/SleepWellBaby/actions/workflows/unit_test.yml/badge.svg)](https://github.com/UMCU-Digital-Health/SleepWellBaby/actions/workflows/unit_test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <img src="https://cdn.worldvectorlogo.com/logos/umc-utrecht-1.svg" alt="UMCU Logo" width="200"/>
 
