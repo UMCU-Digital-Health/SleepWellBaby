@@ -18,7 +18,7 @@ The easiest way to install the `sleepwellbaby` package is to
 to use the package manager [uv](https://docs.astral.sh/uv/), a modern Python package manager that simplifies dependency management and ensures reproducibility:
 
 ```bash
-uv sync
+uv sync --frozen
 ```
 
 ### Starterkit
@@ -30,6 +30,8 @@ Dataset and model information can be found in the [dataset card](docs/dataset_ca
 ## Citation instructions
 Reference should be made to the sleep-well baby paper when using this software.
 
+
+```
 @article{10.1093/sleep/zsac143,
     author = {Sentner, Thom and Wang, Xiaowan and de Groot, Eline R and van Schaijk, Lieke and Tataranno, Maria Luisa and Vijlbrief, Daniel C and Benders, Manon J N L and Bartels, Richard and Dudink, Jeroen},
     title = {The Sleep Well Baby project: an automated real-time sleep–wake state prediction algorithm in preterm infants},
@@ -44,3 +46,4 @@ Reference should be made to the sleep-well baby paper when using this software.
     url = {https://doi.org/10.1093/sleep/zsac143},
     eprint = {https://academic.oup.com/sleep/article-pdf/45/10/zsac143/45986688/zsac143.pdf},
 }
+```
