@@ -29,32 +29,32 @@ def test_return_y_pred():
     # With W_threshold
     preds = return_y_pred(probas,
                           classes,
-                          W_label="W",
-                          W_thresh=0.25)
+                          wake_label="W",
+                          wake_thresh=0.25)
     assert preds[0] == "W"
     assert preds[1] == "W"
     assert preds[2] == "AS"
 
-    # invalid W_label
+    # invalid wake_label
     try:
-        return_y_pred(np.array([0.1, 0.1, 0.8]), classes, W_label="INVALID", W_thresh=0.5)
+        return_y_pred(np.array([0.1, 0.1, 0.8]), classes, wake_label="INVALID", wake_thresh=0.5)
     except Exception as e:
-        assert "W_label is expected to be in classes" in str(e)
+        assert "wake_label is expected to be in classes" in str(e)
 
     # Inclomplete argument (only label or threshold provided)
     probas = np.array([[0.1, 0.7, 0.2]])
 
     # Only W label provided
     try:
-        return_y_pred(probas, classes, W_label="W")
+        return_y_pred(probas, classes, wake_label="W")
     except Exception as e:
-        assert "W_label and W_thresh should be provided in conjunction" in str(e)
+        assert "wake_label and wake_thresh should be provided in conjunction" in str(e)
 
     # Only W threshold provided
     try:
-        return_y_pred(probas, classes, W_thresh=0.3)
+        return_y_pred(probas, classes, wake_thresh=0.3)
     except Exception as e:
-        assert "W_label and W_thresh should be provided in conjunction" in str(e)
+        assert "wake_label and wake_thresh should be provided in conjunction" in str(e)
 
 def test_process_prediction():
     probas = np.array([[0.1, 0.7, 0.2]])
