@@ -19,6 +19,16 @@ lookback_windows = [60, 120, 240, 480]  # lookback windows in seconds
 
 
 class StandardScalerWithoutFit(StandardScaler):
+    """
+    A variant of sklearn's StandardScaler that does not require fitting.
+
+    This class allows you to create a StandardScaler instance with precomputed mean and scale values,
+    bypassing the need to call `fit()` on data. This is used to apply pre-computed individualized scaling parameters for a particular subject.
+
+    Notes
+    -----
+    - The `_handle_zeros_in_scale` function is used to avoid division by zero in scaling.
+    """
     def __init__(self, mean, scale):
         super().__init__(copy=True, with_mean=True, with_std=True)
 

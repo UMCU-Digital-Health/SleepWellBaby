@@ -4,7 +4,6 @@ from sleepwellbaby.data import get_example_payload
 
 
 def test_get_example_payload_success(monkeypatch):
-    # Mock importlib_resources.files().joinpath().read_bytes()
     class DummyPath:
         def read_bytes(self):
             # Minimal valid JSON for the payload

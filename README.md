@@ -14,8 +14,16 @@ Email: r.t.bartels-6@umcutrecht.nl
 This repository contains code to run the sleep-well baby model that can classify sleep stages in 
 preterm infants based on vital signs. It only contains code for model inference, not for training.
 
+**Important**: *this software is for research use only and not intended for clinical or diagnostic purposes. Use at your own risk.*
+
 ## Getting started
+
+
+
 ### Installation
+
+> **⚠️ Warning:**  
+> This software only runs on `Python 3.8` because the model file was produced using that version.
 
 The easiest way to install the `sleepwellbaby` package is to 
 to use the package manager [uv](https://docs.astral.sh/uv/), a modern Python package manager that simplifies dependency management and ensures reproducibility:

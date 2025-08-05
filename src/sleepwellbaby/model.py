@@ -47,17 +47,17 @@ def process_prediction(
 
     pred_label = pred[0]
     proba_dict = {k: v for k, v in zip(classes, pred_proba[0])}
-    # return pred_label, proba_dict
+
     return pred_label, proba_dict
 
 
 def return_y_pred(
-    probas: np.ndarray, classes: List[str], W_label: str = None, W_thresh: float = None
+    probas: np.ndarray, classes: List[str], wake_label: str = None, wake_thresh: float = None
 ) -> List[str]:
     """
     Return predictions.
 
-    If provided, predict `W_label` based on threshold,
+    If provided, predict `wake_label` based on threshold,
     and remaining labels based on highest probability.
 
     Parameters
@@ -66,28 +66,28 @@ def return_y_pred(
         Probabilities per class, shape (n_samples, n_classes).
     classes : list of str
         Names of classes.
-    W_label : str, optional
+    wake_label : str, optional
         Class that corresponds to Wake. Defaults to None.
-    W_thresh : float, optional
-        Threshold to predict `W_label`. Defaults to None.
+    wake_thresh : float, optional
+        Threshold to predict `wake_label`. Defaults to None.
 
     Returns
     -------
     list of str
         Predicted classes.
     """
-    if (W_label is None and W_thresh is not None) or (
-        W_label is not None and W_thresh is None
+    if (wake_label is None and wake_thresh is not None) or (
+        wake_label is not None and wake_thresh is None
     ):
-        raise Exception("W_label and W_thresh should be provided in conjunction")
-    if W_label:
-        if W_label not in classes:
-            raise Exception("W_label is expected to be in classes")
-        W_mask = np.array([i == W_label for i in classes])
-        # Calculate what would be the prediction when disregarding W_label
+        raise Exception("wake_label and wake_thresh should be provided in conjunction")
+    if wake_label:
+        if wake_label not in classes:
+            raise Exception("wake_label is expected to be in classes")
+        W_mask = np.array([i == wake_label for i in classes])
+        # Calculate what would be the prediction when disregarding wake_label
         y_pred = [classes[i] for i in probas[:, ~W_mask].argmax(axis=1)]
         # Predict Wake wherever probability exceeds threshold
-        y_pred = np.where(probas.T[W_mask][0] > W_thresh, W_label, y_pred)
+        y_pred = np.where(probas.T[W_mask][0] > wake_thresh, wake_label, y_pred)
     else:
         y_pred = [classes[i] for i in probas.argmax(axis=1)]
     return y_pred
