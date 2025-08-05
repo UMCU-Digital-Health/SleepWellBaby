@@ -38,7 +38,12 @@ class StandardScalerWithoutFit(StandardScaler):
 
 
 def dict_to_df(data: dict) -> pd.DataFrame:
-    """Extract vital parameters from payload (json) to dataframe."""
+    """Extract vital parameters from payload (json) to dataframe.
+    
+    Notes
+    -----
+    - NANs (coded as 0 or -1) are implicitly removed in the rescale function
+    """
 
     to_df = {}
     for k, v in data.items():
@@ -46,8 +51,7 @@ def dict_to_df(data: dict) -> pd.DataFrame:
             continue
         to_df[k.split("param_")[1]] = v["values"]
     df = pd.DataFrame(to_df)
-    # TODO: move comment
-    # NANs (coded as 0 or -1) are implicitely removed in the rescale function
+
     return df
 
 

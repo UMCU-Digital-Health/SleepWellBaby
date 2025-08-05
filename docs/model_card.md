@@ -37,7 +37,7 @@ This model may reflect biases present in the training data, such as times at whi
 ### Recommendations
 Users should be made aware of the risks, biases and limitations of the model. In particular, 
 * This model has not been cleared as a medical device and cannot be used safely for patient management. 
-* The model was trained on an imperfect golden standard for sleep stages, namely human observations
+* The model was trained on an imperfect gold standard for sleep stages, namely human observations
 * The model is not a perfect, neither in terms of discrimination or calibration
 
 ## How to Get Started with the Model

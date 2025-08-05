@@ -43,8 +43,6 @@ api = Api(
     format_checker=format_checker,
 )
 
-
-# NOTE Endpoints documented in README
 # Predict endpoint
 models_in_pred_pr = {
     k: api.model(f"payload_predict_{k}", v) for k, v in args_pred_pr.items()

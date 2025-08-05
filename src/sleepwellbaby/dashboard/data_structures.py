@@ -27,9 +27,6 @@ def make_required_and_add_example(d, exmpl_data):
 
 possible_pred_values = ["active_sleep", "quiet_sleep", "wake", "ineligible"]
 
-# NOTE we might add value descriptions as in README.md to the input models / args
-
-# NOTE Payload documented in README
 coverage_req = {"description": "Should be based on max 50% missing values"}
 
 v_values = {"cls_or_instance": Float(min=-1), "min_items": 192, "max_items": 192}
@@ -54,7 +51,6 @@ args_pred_other = {
 }
 args_pred_other = make_required_and_add_example(args_pred_other, example_payload)
 
-# NOTE Response documented in README
 response_pred = {
     "prediction": String(enum=possible_pred_values),
     "AS": Float(min=-1, max=1),

@@ -30,7 +30,6 @@ def replace_today_placeholder(d: dict) -> dict:
     return d
 
 
-# Note: there is no outlier detection on the values list
 def get_example_payload():
     """
     Loads and returns the example payload from the 'example_payload.json' file located in the 'templates' directory of the 'sleepwellbaby' package.
@@ -159,7 +158,7 @@ def convert_to_payload(
 
     if isinstance(row.name, datetime.datetime):
         observation_date = str(row.name.date())
-    elif datetime in row.keys():
+    elif 'datetime' in row.keys():
         if isinstance(row['datetime'], datetime.datetime):
             observation_date = str(row['datetime'].date())
     else:
