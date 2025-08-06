@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Tuple
 
+import importlib_resources
 import joblib
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from sleepwellbaby import package_root
 from sleepwellbaby.eligibility import check_eligibility
 from sleepwellbaby.preprocess import pipeline
 
@@ -12,11 +12,19 @@ from sleepwellbaby.preprocess import pipeline
 def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
     """Load model files."""
 
-    with open(package_root / "output" / "models" / "classifier.bz2", mode="rb") as f:
+    # with open(package_root / "output" / "models" / "classifier.bz2", mode="rb") as f:
+    #     model: BaseEstimator = joblib.load(f)
+    # with open(
+    #     package_root / "output" / "models" / "trained_support_obj.pkl", mode="rb"
+    # ) as f:
+    #     model_support_dict: Dict[str, Any] = joblib.load(f)
+    # return model, model_support_dict
+
+    resource_path_model = importlib_resources.files("sleepwellbaby").joinpath("modelfiles", "classifier.bz2")
+    resource_path_support = importlib_resources.files("sleepwellbaby").joinpath("modelfiles", "trained_support_obj.pkl")
+    with resource_path_model.open("rb") as f:
         model: BaseEstimator = joblib.load(f)
-    with open(
-        package_root / "output" / "models" / "trained_support_obj.pkl", mode="rb"
-    ) as f:
+    with resource_path_support.open("rb") as f:
         model_support_dict: Dict[str, Any] = joblib.load(f)
     return model, model_support_dict
 
