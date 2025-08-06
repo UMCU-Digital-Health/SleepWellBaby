@@ -11,6 +11,8 @@ from sleepwellbaby.model import get_prediction, load_model
 def get_swb_predictions(
     df: pd.DataFrame,
     indices: Iterable[pd.Timestamp],
+    birth_date: str,
+    gestation_period: int,
     freq: str = 'S',
     missing_index_threshold: float = 0.1
 ) -> Tuple[pd.DataFrame, List[str]]:
@@ -27,6 +29,10 @@ def get_swb_predictions(
         Input DataFrame containing time-indexed data with feature columns, including those with 'mean' or 'std' in their names.
     indices : iterable of pandas.Timestamp
         List or array of timestamps at which to compute SWB predictions.
+    birth_date : str
+        Birth date of the subject, used for payload preparation, format: 'yyyy-mm-dd'
+    gestation_period : int
+        Gestation period of the subject in days, used for payload preparation.
     freq : str, optional
         Frequency of the generated timestamps. Options are:
             - 'S': 1-second intervals (default)
@@ -71,7 +77,7 @@ def get_swb_predictions(
             pred = 'ineligible'
             proba_dict = {'AS': -1, 'QS': -1, 'W': -1}
         else:
-            payload = convert_to_payload(temp, birth_date='2000-01-01')
+            payload = convert_to_payload(temp, birth_date=birth_date, gestation_period=gestation_period)
             pred, proba_dict = get_prediction(payload, model, model_support_dict)
         columns =list(proba_dict.keys())
         if ix == 0:

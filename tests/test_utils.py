@@ -16,7 +16,7 @@ def test_get_swb_predictions():
         # Get indices of times at which you want to get an SWB value (we only compute it at whole minutes)
         t_range_swb = pd.date_range(start=df.index.min().round(freq='min'), end=df.index.max().round(freq='min'), freq='1min')[-10:-8]
 
-        df_pred, columns = get_swb_predictions(df, t_range_swb, freq=freq)
+        df_pred, columns = get_swb_predictions(df, t_range_swb, birth_date='2000-01-01', gestation_period=210, freq=freq)
 
         assert isinstance(df_pred, pd.DataFrame)
         assert isinstance(columns, list)
@@ -27,16 +27,16 @@ def test_get_swb_predictions():
         # Check that valueerror is raised if too many elements are missing from the list
         if freq == 'S':
             with pytest.raises(ValueError, match="of the timestamps missing from DataFrame index"):
-                get_swb_predictions(df, t_range_swb, freq='2s500ms')
+                get_swb_predictions(df, t_range_swb, freq='2s500ms', birth_date='2000-01-01', gestation_period=210)
             # No valueerror when threshold is set to 1
             try:
-                df_pred, columns = get_swb_predictions(df, t_range_swb, freq='2s500ms', missing_index_threshold=1)
+                df_pred, columns = get_swb_predictions(df, t_range_swb, freq='2s500ms', birth_date='2000-01-01', gestation_period=210, missing_index_threshold=1)
             except ValueError:
                 pytest.fail("ValueError was raised when missing_index_threshold=1")
         if freq == '2s500ms':
             with pytest.raises(ValueError, match="of the timestamps missing from DataFrame index"):
-                get_swb_predictions(df, t_range_swb, freq='S')
+                get_swb_predictions(df, t_range_swb, birth_date='2000-01-01', gestation_period=210, freq='S')
             try:
-                df_pred, columns = get_swb_predictions(df, t_range_swb, freq='S', missing_index_threshold=1)
+                df_pred, columns = get_swb_predictions(df, t_range_swb,birth_date='2000-01-01', gestation_period=210, freq='S', missing_index_threshold=1)
             except ValueError:
                 pytest.fail("ValueError was raised when missing_index_threshold=1")
