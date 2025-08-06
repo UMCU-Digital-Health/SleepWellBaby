@@ -1,7 +1,6 @@
 import datetime
 import json
 
-# import flask_monitoringdashboard as dashboard
 from flask import Flask, request
 from flask_restx import Api, Resource
 from flask_restx.fields import Nested
@@ -10,8 +9,8 @@ from werkzeug.exceptions import MethodNotAllowed
 
 from sleepwellbaby import version
 from sleepwellbaby.dashboard.data_structures import (
-    args_pred_other,
-    args_pred_pr,
+    args_patient_characteristics,
+    args_vitals,
     response_pred,
 )
 from sleepwellbaby.model import get_prediction, load_model
@@ -21,18 +20,18 @@ model, model_support_dict = load_model()
 
 app = Flask(__name__)
 
-# Allow dates not to strictly adhere to ISO8601
-# https://github.com/noirbizarre/flask-restplus/issues/603#issuecomment-472367498
+
 format_checker = FormatChecker()
 
-
-# fmt: on
 @format_checker.checks("date", ValueError)  # noqa: E302
 def lenient_date_check(value):
-    """Check if input value is valid date"""
+    """Check if input value is valid date.
+
+    Allow dates not to strictly adhere to ISO8601
+    https://github.com/noirbizarre/flask-restplus/issues/603#issuecomment-472367498
+    """
     datetime.datetime.strptime(value, "%Y-%m-%d")
     return True
-
 
 api = Api(
     app,
@@ -45,13 +44,13 @@ api = Api(
 
 # Predict endpoint
 models_in_pred_pr = {
-    k: api.model(f"payload_predict_{k}", v) for k, v in args_pred_pr.items()
+    k: api.model(f"payload_predict_{k}", v) for k, v in args_vitals.items()
 }
-args_pred = {
-    **args_pred_other,
+args = {
+    **args_patient_characteristics,
     **{k: Nested(v, required=True) for k, v in models_in_pred_pr.items()},
 }
-model_in_pred = api.model("payload_predict", args_pred)
+model_in_pred = api.model("payload_predict", args)
 model_out_pred = api.model("response_predict", response_pred)
 
 

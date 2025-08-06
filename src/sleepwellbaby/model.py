@@ -4,10 +4,9 @@ import joblib
 import numpy as np
 from sklearn.base import BaseEstimator
 
+from sleepwellbaby import package_root
 from sleepwellbaby.eligibility import check_eligibility
 from sleepwellbaby.preprocess import pipeline
-
-from . import package_root
 
 
 def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
@@ -83,11 +82,11 @@ def return_y_pred(
     if wake_label:
         if wake_label not in classes:
             raise Exception("wake_label is expected to be in classes")
-        W_mask = np.array([i == wake_label for i in classes])
+        wake_mask = np.array([i == wake_label for i in classes])
         # Calculate what would be the prediction when disregarding wake_label
-        y_pred = [classes[i] for i in probas[:, ~W_mask].argmax(axis=1)]
+        y_pred = [classes[i] for i in probas[:, ~wake_mask].argmax(axis=1)]
         # Predict Wake wherever probability exceeds threshold
-        y_pred = np.where(probas.T[W_mask][0] > wake_thresh, wake_label, y_pred)
+        y_pred = np.where(probas.T[wake_mask][0] > wake_thresh, wake_label, y_pred)
     else:
         y_pred = [classes[i] for i in probas.argmax(axis=1)]
     return y_pred

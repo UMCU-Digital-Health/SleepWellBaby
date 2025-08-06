@@ -1,0 +1,33 @@
+import pandas as pd
+import pytest
+
+from sleepwellbaby.data import compute_reference_values, generate_mock_signalbase_data
+from sleepwellbaby.utils import get_swb_predictions
+
+
+def test_get_swb_predictions():
+
+    # Generate mock data with 1Hz frequency
+    for freq in ['S', '2s500ms']:
+        df = generate_mock_signalbase_data(freq=freq).sort_values(by='datetime').set_index('datetime')
+        df = compute_reference_values(df, freq=1)
+
+        # Select two timestamps 1min apart
+        # Get indices of times at which you want to get an SWB value (we only compute it at whole minutes)
+        t_range_swb = pd.date_range(start=df.index.min().round(freq='min'), end=df.index.max().round(freq='min'), freq='1min')[-10:-8]
+
+        df_pred, columns = get_swb_predictions(df, t_range_swb, freq=freq)
+
+        assert isinstance(df_pred, pd.DataFrame)
+        assert isinstance(columns, list)
+        assert all(col in df_pred.columns for col in columns)
+        assert df_pred.loc[t_range_swb[0]].notnull().any()
+        assert df_pred.loc[t_range_swb[1]].notnull().any()
+
+        # Check that valueerror is raised if too many elements are missing from the list
+        if freq == 'S':
+            with pytest.raises(ValueError, match="More than 1 timestamp missing from DataFrame index"):
+                get_swb_predictions(df, t_range_swb, freq='2s500ms')
+        if freq == '2s500ms':
+            with pytest.raises(ValueError, match="More than 1 timestamp missing from DataFrame index"):
+                get_swb_predictions(df, t_range_swb, freq='S')

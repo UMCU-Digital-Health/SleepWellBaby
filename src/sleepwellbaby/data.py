@@ -1,5 +1,6 @@
 import datetime
 import json
+import warnings
 
 import importlib_resources
 import numpy as np
@@ -34,22 +35,29 @@ def get_example_payload():
     """
     Loads and returns the example payload from the 'example_payload.json' file located in the 'templates' directory of the 'sleepwellbaby' package.
 
-    Returns:
+    Returns
+    -------
       dict: The parsed JSON payload as a Python dictionary.
 
-    Raises:
+    Raises
+    ------
       FileNotFoundError: If the 'example_payload.json' file does not exist.
       json.JSONDecodeError: If the file contents are not valid JSON.
     """
-    my_resources = importlib_resources.files("sleepwellbaby")
-    data_bytes = my_resources.joinpath("templates", "example_payload.json").read_bytes()
-    payload = json.loads(
-        data_bytes.decode("utf-8"), object_hook=replace_today_placeholder
-    )
+    # my_resources = importlib_resources.files("sleepwellbaby")
+    # data_bytes = my_resources.joinpath("templates", "example_payload.json").read_bytes()
+    # payload = json.loads(
+    #     data_bytes.decode("utf-8"), object_hook=replace_today_placeholder
+    # )
+    # return payload
+    resource_path = importlib_resources.files("sleepwellbaby").joinpath("templates", "example_payload.json")
+
+    with resource_path.open("r", encoding="utf-8") as f:
+        payload = json.load(f, object_hook=replace_today_placeholder)
     return payload
 
 
-def generate_mock_signalbase_data(duration: int = 48) -> pd.DataFrame:
+def generate_mock_signalbase_data(duration: int = 48, freq: str = 'S') -> pd.DataFrame:
     """
     Generates a mock DataFrame simulating SignalBase data for a given duration in hours.
 
@@ -57,6 +65,10 @@ def generate_mock_signalbase_data(duration: int = 48) -> pd.DataFrame:
     ----------
     duration : int, optional
         Duration in hours for which to generate data. Default is 48.
+    freq : str, optional
+        Frequency of the generated timestamps. Options are:
+            - 'S': 1-second intervals (default)
+            - '2s500ms': 2.5-second intervals
 
     Returns
     -------
@@ -68,13 +80,20 @@ def generate_mock_signalbase_data(duration: int = 48) -> pd.DataFrame:
             - 'SpO2': Simulated oxygen saturation values (random integers between 85 and 99).
             - 'ID': Constant identifier value (1).
     """
-    n_seconds = duration*60*60
+
+    if freq not in ['S', '2s500ms']:
+        raise ValueError(f"freq must be 'S' or '2s500ms', got {freq}.")
+
+    periods = duration*60*60
+    if freq == '2s500ms':
+        periods = int(periods / 2.5)
+
     df = pd.DataFrame({
-        'datetime': pd.date_range(start='2000-01-01', periods=n_seconds, freq='S')
+        'datetime': pd.date_range(start='2000-01-01', periods=periods, freq=freq)
     })
-    df['HR'] = np.random.normal(150, scale=20, size=n_seconds)
-    df['RESP'] = np.random.normal(50, scale=15, size=n_seconds)
-    df['SpO2'] = np.random.choice(range(85, 100), size=n_seconds)
+    df['HR'] = np.random.normal(150, scale=20, size=periods)
+    df['RESP'] = np.random.normal(50, scale=15, size=periods)
+    df['SpO2'] = np.random.choice(range(85, 100), size=periods)
     df['ID'] = 1
     return df
 
@@ -88,13 +107,15 @@ def compute_reference_values(
     Computes rolling mean and standard deviation for heart rate (HR), respiration rate (RESP),
     and oxygen saturation (SpO2) over 2-hour and 24-hour windows.
 
-    Parameters:
+    Parameters
+    ----------
         df (pd.DataFrame): Input DataFrame containing columns 'HR', 'RESP', and 'SpO2'.
         freq (int, optional): Sampling frequency in Hz (default is 1).
         tolerance_2 (float, optional): Minimum fraction of expected samples required for 2-hour window (default is 0.10, similar to BedBase implementation).
         tolerance_24 (float, optional): Minimum fraction of expected samples required for 24-hour window (default is 0.05, similar to BedBase implementation).
 
-    Returns:
+    Returns
+    -------
         pd.DataFrame: DataFrame with additional columns for rolling mean and standard deviation:
             - 'HR_2h_mean', 'RESP_2h_mean', 'SpO2_2h_mean'
             - 'HR_2h_std', 'RESP_2h_std', 'SpO2_2h_std'
@@ -145,20 +166,28 @@ def convert_to_payload(
         If the DataFrame does not have exactly 192 rows or its index is not monotonic increasing.
     """
     if birth_date is None:
-        # Set to today
+        warnings.warn("birth_date is not specified. Setting to today's date.", UserWarning, stacklevel=2)
         birth_date = datetime.datetime.today().strftime('%Y-%m-%d')
     if gestation_period is None:
         gestation_period = 210
 
 
-    assert len(df) == 192
-    assert df.index.is_monotonic_increasing
+    if len(df) != 192:
+        raise ValueError(f"DataFrame must have exactly 192 rows, got {len(df)}.")
+    # Ensure index is DatetimeIndex or set it from 'datetime' column if available
+    if not isinstance(df.index, pd.DatetimeIndex):
+        if 'datetime' in df.columns:
+            df = df.set_index('datetime')
+        else:
+            raise ValueError("DataFrame must have a DatetimeIndex or a 'datetime' column.")
+    if not df.index.is_monotonic_increasing:
+        raise ValueError("DataFrame index must be monotonic increasing.")
 
     row = df.iloc[-1]
 
     if isinstance(row.name, datetime.datetime):
         observation_date = str(row.name.date())
-    elif 'datetime' in row.keys():
+    elif "datetime" in row.keys():
         if isinstance(row['datetime'], datetime.datetime):
             observation_date = str(row['datetime'].date())
     else:

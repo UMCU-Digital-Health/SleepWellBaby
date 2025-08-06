@@ -31,10 +31,12 @@ def data_eligibility(payload: dict) -> bool:
     For each parameter in the payload, verifies that no more than 50% of values are missing
     (missing values are coded as 0 or -1) in all lookback windows.
 
-    Args:
+    Parameters
+    ----------
         payload (dict): Dictionary containing parameter values.
 
-    Returns:
+    Returns
+    -------
         bool: True if data completeness is sufficient, False otherwise.
     """
 

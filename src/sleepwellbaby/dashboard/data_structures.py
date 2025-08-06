@@ -9,11 +9,13 @@ from sleepwellbaby.data import get_example_payload
 def make_required_and_add_example(d, exmpl_data):
     """Makes flask_restx fields required, and adds examples from provided data
 
-    Args:
+    Parameters
+    ----------
         d (dict): dict of flask_restx.fields
         exmpl_data (dict): dict of examples, similarly keyed as `d`
 
-    Returns:
+    Returns
+    -------
         dict: dict of flask_restx.fields, with added examples and required set to True
     """
     for k in d.keys():
@@ -31,7 +33,7 @@ coverage_req = {"description": "Should be based on max 50% missing values"}
 
 v_values = {"cls_or_instance": Float(min=-1), "min_items": 192, "max_items": 192}
 
-args_pred_pr = {
+args_vitals = {
     k: {
         **{
             "_".join(i): Float(**coverage_req)
@@ -43,13 +45,13 @@ args_pred_pr = {
 }
 
 example_payload = get_example_payload()
-args_pred_pr = make_required_and_add_example(args_pred_pr, example_payload)
-args_pred_other = {
+args_vitals = make_required_and_add_example(args_vitals, example_payload)
+args_patient_characteristics = {
     "birth_date": Date(),
     "gestation_period": Integer(),
     "observation_date": Date(nullable=True),
 }
-args_pred_other = make_required_and_add_example(args_pred_other, example_payload)
+args_patient_characteristics = make_required_and_add_example(args_patient_characteristics, example_payload)
 
 response_pred = {
     "prediction": String(enum=possible_pred_values),
