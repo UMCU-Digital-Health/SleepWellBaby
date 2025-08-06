@@ -21,7 +21,7 @@ dependencies =[
     "imbalanced-learn>=0.7.0",
     "numpy>=1.20.3,<1.23",
     "pandas>=1.2.5", 
-    "scikit-learn>=1.0,<1.5",
+    "scikit-learn>=1.0,<1.1",
     "tsfresh>=0.17.0",
     "setuptools",
 ]
@@ -56,3 +56,10 @@ select = [
     "I",  # isort
 ]
 ignore = ["E501",]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"sleepwellbaby" = ["modelfiles/*.pkl", "modelfiles/*.bz2", "templates/*.json"]
+
