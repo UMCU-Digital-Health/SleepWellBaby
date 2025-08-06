@@ -26,8 +26,17 @@ def test_get_swb_predictions():
 
         # Check that valueerror is raised if too many elements are missing from the list
         if freq == 'S':
-            with pytest.raises(ValueError, match="More than 1 timestamp missing from DataFrame index"):
+            with pytest.raises(ValueError, match="of the timestamps missing from DataFrame index"):
                 get_swb_predictions(df, t_range_swb, freq='2s500ms')
+            # No valueerror when threshold is set to 1
+            try:
+                df_pred, columns = get_swb_predictions(df, t_range_swb, freq='2s500ms', missing_index_threshold=1)
+            except ValueError:
+                pytest.fail("ValueError was raised when missing_index_threshold=1")
         if freq == '2s500ms':
-            with pytest.raises(ValueError, match="More than 1 timestamp missing from DataFrame index"):
+            with pytest.raises(ValueError, match="of the timestamps missing from DataFrame index"):
                 get_swb_predictions(df, t_range_swb, freq='S')
+            try:
+                df_pred, columns = get_swb_predictions(df, t_range_swb, freq='S', missing_index_threshold=1)
+            except ValueError:
+                pytest.fail("ValueError was raised when missing_index_threshold=1")

@@ -2201,7 +2201,7 @@ requires-dist = [
     { name = "imbalanced-learn", specifier = ">=0.7.0" },
     { name = "numpy", specifier = ">=1.20.3,<1.23" },
     { name = "pandas", specifier = ">=1.2.5" },
-    { name = "scikit-learn", specifier = ">=1.0,<1.5" },
+    { name = "scikit-learn", specifier = ">=1.0,<1.1" },
     { name = "setuptools" },
     { name = "tsfresh", specifier = ">=0.17.0" },
 ]

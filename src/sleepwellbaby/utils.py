@@ -11,7 +11,8 @@ from sleepwellbaby.model import get_prediction, load_model
 def get_swb_predictions(
     df: pd.DataFrame,
     indices: Iterable[pd.Timestamp],
-    freq: str = 'S'
+    freq: str = 'S',
+    missing_index_threshold: float = 0.1
 ) -> Tuple[pd.DataFrame, List[str]]:
     """
     Generate SleepWellBaby (SWB) predictions for specified timestamps in a DataFrame.
@@ -30,6 +31,10 @@ def get_swb_predictions(
         Frequency of the generated timestamps. Options are:
             - 'S': 1-second intervals (default)
             - '2s500ms': 2.5-second intervals
+    missing_index_threshold : float, optional
+        Maximum allowed fraction of missing timestamps in the window for a prediction to be attempted.
+        If the fraction of missing timestamps exceeds this threshold, a ValueError is raised.
+        Default is 0.1 (i.e., 10%).
 
     Returns
     -------
@@ -42,6 +47,7 @@ def get_swb_predictions(
     -----
     - Predictions are computed for each timestamp using a window of the previous 8 minutes, sampled every 2.5 seconds.
     - If any required reference columns are missing for a timestamp, the prediction is set to 'ineligible' and probabilities to -1.
+    - If more than `missing_index_threshold` fraction of timestamps are missing from the DataFrame index for a given window, a ValueError is raised.
     """
     model, model_support_dict = load_model()
     ref_columns = [c for c in df.columns if ('mean' in c) or ('std' in c)]
@@ -53,8 +59,8 @@ def get_swb_predictions(
         if freq == 'S':
             timestamps = timestamps.round('1s')
         missing_timestamps = [ts for ts in timestamps if ts not in df.index]
-        if len(missing_timestamps) > 1:
-            raise ValueError(f"More than 1 timestamp missing from DataFrame index: {missing_timestamps}")
+        if len(missing_timestamps) / len(timestamps) > missing_index_threshold:
+            raise ValueError(f"More than {missing_index_threshold*100}% of the timestamps missing from DataFrame index: n = {len(missing_timestamps)}")
 
         temp = df.reindex(index=timestamps)  # sets rows with missing indices to nan
         row = temp.iloc[-1]
