@@ -23,6 +23,7 @@ dependencies =[
     "pandas>=1.2.5", 
     "scikit-learn>=1.0,<1.5",
     "tsfresh>=0.17.0",
+    "setuptools",
 ]
 
 [dependency-groups]

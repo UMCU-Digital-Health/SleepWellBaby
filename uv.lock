@@ -2177,6 +2177,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "scikit-learn" },
+    { name = "setuptools" },
     { name = "tsfresh" },
 ]
 
@@ -2201,6 +2202,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.20.3,<1.23" },
     { name = "pandas", specifier = ">=1.2.5" },
     { name = "scikit-learn", specifier = ">=1.0,<1.5" },
+    { name = "setuptools" },
     { name = "tsfresh", specifier = ">=0.17.0" },
 ]
 
