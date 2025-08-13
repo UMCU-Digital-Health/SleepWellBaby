@@ -19,10 +19,10 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.8'
 
     - name: Install dependencies
-      run: uv sync --all-extras --dev
+      run: uv sync --frozen --all-extras --dev
 
     - name: Running Unit tests
       run: uv run pytest tests/ --doctest-modules --cov=src --cov-report=xml

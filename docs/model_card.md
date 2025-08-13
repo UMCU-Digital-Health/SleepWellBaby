@@ -3,181 +3,152 @@
 
 # Model Card for SleepWellBaby
 
-*Briefly summarize what the model does*
-Neonatal sleep stage monitoring based on vital signs
+The model predicts the sleep stage of preterm infants based on vital signs collected by a bedside monitor
 
 ## Model Details
 
 ### Model Description
 
-* Provide a longer summary of what this model is.*
+This model uses vital parameter data samppled at $0.4$ Hz from the preceding eight minutes to predict the sleep stage (`active sleep`, `quiet sleep` or `wake`). It can be used for continuous (every minute) monitoring of sleep stages.
 
-- **Developed by:** ...
-- **Funded by [optional]:** ...
-- **Shared by [optional]:** ...
-- **Model type:** ...
-- **Language(s) (NLP):** ...
-- **License:** ...
-- **Finetuned from model [optional]:** ...
+- **Developed by:** Thom Sentner et al.
+- **Model type:** Random Forest Classifier (multiclass)
+- **License:** MIT
 
-### Model Sources [optional]
+### Model Sources
+- **Paper:** https://doi.org/10.1093/sleep/zsac143
 
-- **Repository:** ...
-- **Paper [optional]:** ...
-- **Demo [optional]:** ...
 
 ## Uses
-
-*Address questions around how the model is intended to be used, including the foreseeable users of the model and those affected by the model.*
+This software is *for research use only*
 
 ### Direct Use
+The Sleep Well Baby algorithm is intended to monitor sleep as a vital sign. It was developed for preterm infants on the neonatal intensive care unit (NICU) with postmenstrual ages $[28, 34)$ weeks.
 
-*This section is for the model use without fine-tuning or plugging into a larger ecosystem/app.*
-
-[More Information Needed]
-
-### Downstream Use [optional]
-
-*This section is for the model use when fine-tuned for a task, or when plugged into a larger ecosystem/app*
-
+Foreseeable primary users of the model include healthcare workers (e.g. nurses and neonatologists) and sleep researchers.
 
 ### Out-of-Scope Use
-
-* This section addresses misuse, malicious use, and uses that the model will not work well for.*
+The software is not suitable for use in clinical management.
 
 ## Bias, Risks, and Limitations
-
-*This section is meant to convey both technical and sociotechnical limitations.*
+This model may reflect biases present in the training data, such as times at which sleep stages were observed and the circumstances under which sleep stages were observed (e.g. patient conditions, noise in the ward). Predictions should be interpreted with caution.
 
 
 ### Recommendations
-
-*This section is meant to convey recommendations with respect to the bias, risk, and technical limitations., e.g. "Users (both direct and downstream) should be made aware of the risks, biases and limitations of the model. More information needed for further recommendations."*
+Users should be made aware of the risks, biases and limitations of the model. In particular, 
+* This model has not been cleared as a medical device and cannot be used safely for patient management. 
+* The model was trained on an imperfect gold standard for sleep stages, namely human observations
+* The model is not a perfect, neither in terms of discrimination or calibration
 
 ## How to Get Started with the Model
-
-Use the code below to get started with the model.
-
-```
-model.predict(X)
-```
+See [`notebooks/example.ipynb`](../notebooks/example.ipynb) for a complete example of how to use the model.
 
 ## Training Details
 
 ### Training Data
 
-*This should link to a Dataset Card, perhaps with a short stub of information on what the training data is all about as well as documentation related to data pre-processing or additional filtering., e.g. see [dataset card](./data/dataset_card.md)*
+The model was trained to predict observed sleep stages (by human annotators) based on vital parameters from the bedside monitor. See [dataset card](dataset_card.md) for details.
 
 ### Training Procedure 
 
-*This relates heavily to the Technical Specifications. Content here should link to that section when it is relevant to the training procedure.*
-
-#### Preprocessing [optional]
-
-...
+For model training a grouped nested cross-validation (`splits=4`) procedure was used, where grouping took place on patient level. Patients where oversampled in the inner loop to equalize the amount of training data per patient.
 
 
 #### Training Hyperparameters
-
-- **Training regime:** 
-*"[More Information Needed]" --fp32, fp16 mixed precision, bf16 mixed precision, bf16 non-mixed precision, fp16 non-mixed precision, fp8 mixed precision*
-
-#### Speeds, Sizes, Times [optional]
-
-*This section provides information about throughput, start/end time, checkpoint size if relevant, etc.*
-
+Random search was used to find the best hyperparameters (indicated in italics)
+* `Class weight`: *balanced*
+* `Number of estimators`: *250*
+* `Max depth`: 2, 3, *5*, 20, 50
+* `Min samples split`: 2%, 4.2%, 8.3%, 16.7%, *33.3%*
+* `Min samples leaf`: 1, 0.4%, *3%*, 6%
+* `Max features`: 5%, *10%*, 20%, 40%
 
 ## Evaluation
 
-*This section describes the evaluation protocols and provides the results.*
+The model was evaluated on the training data using pooled results from the outer loop as well as on a separate validation dataset.
 
 ### Testing Data, Factors & Metrics
 
 #### Testing Data
-
-*This should link to a Dataset Card if possible., e.g. see [dataset card](./data/dataset_card.md)*
-
-#### Factors
-
-*These are the things the evaluation is disaggregating by, e.g., subpopulations or domains.*
+See [dataset card](dataset_card.md).
 
 #### Metrics
-
-*These are the evaluation metrics being used, ideally with a description of why.*
+- Balanced accuracy Wake
+- Sensitivity Wake
+- Specificity Wake
+- F1 score (macroaveraged)
+- F1 score Wake
+- AUROC (macro-averaged)
+- AUROC Active Sleep
+- AUROC Quiet Sleep
+- AUROC Wake
+- Cohen’s kappa
+- Cohen’s kappa Active Sleep
+- Cohen’s kappa Quiet Sleep
+- Cohen’s kappa Wake
+- Brier Active Sleep
+- Brier Quiet Sleep
+- Brier Wake
 
 ### Results
 
-...
+The model achieved a macro-averaged AUROC of 0.76 (0.69-0.82) on the training data and 0.70 (0.61–0.78) on the validation data. Confidence intervals were determined using bootstrapping. 
 
-#### Summary
+Calibration of the model has Brier scores of the order $\sim 0.2$.
 
-...
 
-## Model Examination [optional]
+## Model Examination
 
-*Relevant interpretability work for the model goes here*
+Contributions to individual predictions were examined using Shapley values
 
-## Environmental Impact [optional]
+## Environmental Impact
+The model can be trained locally on CPUs. The environmental impact is low.
 
-*Total emissions (in grams of CO2eq) and additional considerations, such as electricity usage, go here. Edit the suggested text below accordingly*
-
-Carbon emissions can be estimated using the [Machine Learning Impact calculator](https://mlco2.github.io/impact#compute) presented in [Lacoste et al. (2019)](https://arxiv.org/abs/1910.09700).
-
-- **Hardware Type:** [More Information Needed]
-- **Hours used:** [More Information Needed]
-- **Cloud Provider:** [More Information Needed]
-- **Compute Region:** [More Information Needed]
-- **Carbon Emitted:** [More Information Needed]
-
-## Technical Specifications [optional]
+## Technical Specifications
 
 ### Model Architecture and Objective
-
-...
+The model is a multiclass classifier trained on tabular data using `imbalanced-learn` (based on `scikit-learn`).
 
 ### Compute Infrastructure
-
-...
+Trained on a local machine used for development by the AI for Health team at UMC Utrecht.
 
 #### Hardware
-
-...
+The model can be trained on a standard laptop or desktop with sufficient RAM and CPU power. For larger datasets, a machine with more resources may be required.
 
 #### Software
+See [pyproject.toml](../pyproject.toml) files for the software dependencies required to run the model.
 
-...
+## Citation
 
-## Citation [optional]
-
-*If there is a paper or blog post introducing the model, the Bibtex information for that should go in this section.*
-
-Provide the [BibTex](http://www.bibtex.org/)-formatted reference for the dataset. For example:
 ```
-@article{article_id,
-  author    = {Author List},
-  title     = {Dataset Paper Title},
-  journal   = {Publication Venue},
-  year      = {2525}
+@article{10.1093/sleep/zsac143,
+    author = {Sentner, Thom and Wang, Xiaowan and de Groot, Eline R and van Schaijk, Lieke and Tataranno, Maria Luisa and Vijlbrief, Daniel C and Benders, Manon J N L and Bartels, Richard and Dudink, Jeroen},
+    title = {The Sleep Well Baby project: an automated real-time sleep–wake state prediction algorithm in preterm infants},
+    journal = {Sleep},
+    volume = {45},
+    number = {10},
+    pages = {zsac143},
+    year = {2022},
+    month = {06},
+    issn = {0161-8105},
+    doi = {10.1093/sleep/zsac143},
+    url = {https://doi.org/10.1093/sleep/zsac143},
+    eprint = {https://academic.oup.com/sleep/article-pdf/45/10/zsac143/45986688/zsac143.pdf},
 }
 ```
 
 If the model artefact has a [DOI](https://www.doi.org/), please provide it here.
 
-## Glossary [optional]
+## Glossary
 
-*If relevant, include terms and calculations in this section that can help readers understand the model or model card.*
+* **AS**: active sleep
+* **IS**: intermediate sleep
+* **QS**: quiet sleep
+* **W**: wake
 
-## More Information [optional]
-
-...
-
-## Model Card Authors [optional]
-
-
+## Model Card Authors
 * Richard Bartels
-* ...
 
 ## Model Card Contact
 
 * r.t.bartels-6@umcutrecht.nl
-* ...

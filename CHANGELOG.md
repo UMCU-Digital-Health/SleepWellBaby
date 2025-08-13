@@ -7,7 +7,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-07-09
-
-### Added
-- Created project and repository
+## [1.0.0] - 2025-07-30
+This is the first open source release of the sleep-well baby software.

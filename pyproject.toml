@@ -4,27 +4,38 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sleepwellbaby"
-version = "0.1.0"
+version = "1.0.0"
 authors = [
   { name="Richard Bartels", email="r.t.bartels-6@umcutrecht.nl" },
 ]
 description = "Neonatal sleep stage monitoring based on vital signs"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.8,<3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-dependencies =[]
+dependencies =[
+    "Flask>=1.1.4",
+    "flask_restx>=0.2.0",
+    "imbalanced-learn>=0.7.0",
+    "numpy>=1.20.3,<1.23",
+    "pandas>=1.2.5", 
+    "scikit-learn>=1.0,<1.1",
+    "tsfresh>=0.17.0",
+    "setuptools",
+]
 
 [dependency-groups]
 dev = [
     "ipykernel>=6.29.2",
     "pytest>=8.0.1",
-    "nbstripout>=0.7.1",
     "pytest-cov>=5.0.0",
-    "rsconnect-python>=1.24.0",
+    "nbstripout>=0.7.1",
+    "dvc>=2.7.4,<3.0",
+    "toml>=0.10.2",
 ]
+
 lint = [
     "ruff>=0.7.1",
 ]
@@ -44,3 +55,11 @@ select = [
     "C90",  # mccabe complexity
     "I",  # isort
 ]
+ignore = ["E501",]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"sleepwellbaby" = ["modelfiles/*.pkl", "modelfiles/*.bz2", "templates/*.json"]
+
