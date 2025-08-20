@@ -5,7 +5,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from sleepwellbaby.data import convert_to_payload
-from sleepwellbaby.preprocess import pipeline
 from sleepwellbaby.model import get_prediction, load_model
 
 
@@ -85,7 +84,7 @@ def get_swb_predictions(
             X = None
         else:
             payload = convert_to_payload(temp, birth_date=birth_date, gestation_period=gestation_period)
-            
+
             if return_features:
                 pred, proba_dict, X = get_prediction(payload, model, model_support_dict, return_features)
             else:

@@ -2385,7 +2385,7 @@ requires-dist = [
     { name = "flask", specifier = ">=1.1.4" },
     { name = "flask-restx", specifier = ">=0.2.0" },
     { name = "imbalanced-learn", specifier = ">=0.7.0" },
-    { name = "matplotlib", specifier = ">=3.2.2,<3.5" },
+    { name = "matplotlib", specifier = ">=3.2.2,<3.3" },
     { name = "numpy", specifier = ">=1.20.3,<1.23" },
     { name = "pandas", specifier = ">=1.2.5" },
     { name = "scikit-learn", specifier = ">=1.0,<1.1" },
