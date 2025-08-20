@@ -92,7 +92,35 @@ def return_y_pred(
     return y_pred
 
 
-def get_prediction(payload, model=None, model_support_dict=None, return_features=False):
+def get_prediction(
+    payload: dict,
+    model: object = None,
+    model_support_dict: dict = None,
+    return_features: bool = False
+) -> tuple:
+    """
+    Generate a prediction for the given payload using the specified model.
+
+    Parameters
+    ----------
+    payload : dict
+        Input data required for prediction.
+    model : object, optional
+        Trained model object. If None, the model will be loaded automatically.
+    model_support_dict : dict, optional
+        Dictionary containing model support information. If None, it will be loaded automatically.
+    return_features : bool, optional
+        If True, returns the processed features used for prediction.
+
+    Returns
+    -------
+    pred : str
+        Predicted class label or "ineligible" if the payload is not eligible.
+    proba_dict : dict
+        Dictionary of class probabilities. If ineligible, all values are -1.
+    X : Any, optional
+        Processed features used for prediction. Returned only if `return_features` is True.
+    """
     if (model is None) | (model_support_dict is None):
         model, model_support_dict = load_model()
 

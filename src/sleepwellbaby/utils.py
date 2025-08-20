@@ -85,10 +85,12 @@ def get_swb_predictions(
         else:
             payload = convert_to_payload(temp, birth_date=birth_date, gestation_period=gestation_period)
 
+            pred_tuple = get_prediction(payload, model, model_support_dict, return_features=return_features)
             if return_features:
-                pred, proba_dict, X = get_prediction(payload, model, model_support_dict, return_features)
+                pred, proba_dict, X = pred_tuple
             else:
-                pred, proba_dict = get_prediction(payload, model, model_support_dict, return_features)
+                pred, proba_dict = pred_tuple
+
         columns =list(proba_dict.keys())
         if ix == 0:
             df.loc[:, 'prediction'] = None
