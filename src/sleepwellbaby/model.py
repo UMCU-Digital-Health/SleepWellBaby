@@ -12,14 +12,6 @@ from sleepwellbaby.preprocess import pipeline
 def load_model() -> Tuple[BaseEstimator, Dict[str, Any]]:
     """Load model files."""
 
-    # with open(package_root / "output" / "models" / "classifier.bz2", mode="rb") as f:
-    #     model: BaseEstimator = joblib.load(f)
-    # with open(
-    #     package_root / "output" / "models" / "trained_support_obj.pkl", mode="rb"
-    # ) as f:
-    #     model_support_dict: Dict[str, Any] = joblib.load(f)
-    # return model, model_support_dict
-
     resource_path_model = importlib_resources.files("sleepwellbaby").joinpath("modelfiles", "classifier.bz2")
     resource_path_support = importlib_resources.files("sleepwellbaby").joinpath("modelfiles", "trained_support_obj.pkl")
     with resource_path_model.open("rb") as f:
@@ -100,17 +92,49 @@ def return_y_pred(
     return y_pred
 
 
-def get_prediction(payload, model=None, model_support_dict=None):
+def get_prediction(
+    payload: dict,
+    model: object = None,
+    model_support_dict: dict = None,
+    return_features: bool = False
+) -> tuple:
+    """
+    Generate a prediction for the given payload using the specified model.
+
+    Parameters
+    ----------
+    payload : dict
+        Input data required for prediction.
+    model : object, optional
+        Trained model object. If None, the model will be loaded automatically.
+    model_support_dict : dict, optional
+        Dictionary containing model support information. If None, it will be loaded automatically.
+    return_features : bool, optional
+        If True, returns the processed features used for prediction.
+
+    Returns
+    -------
+    pred : str
+        Predicted class label or "ineligible" if the payload is not eligible.
+    proba_dict : dict
+        Dictionary of class probabilities. If ineligible, all values are -1.
+    X : Any, optional
+        Processed features used for prediction. Returned only if `return_features` is True.
+    """
     if (model is None) | (model_support_dict is None):
         model, model_support_dict = load_model()
 
     eligible = check_eligibility(payload)
 
     if eligible:
-        df = pipeline(payload, model_support_dict)
-        pred_proba = model.predict_proba(df)
+        X = pipeline(payload, model_support_dict)
+        pred_proba = model.predict_proba(X)
         pred, proba_dict = process_prediction(pred_proba, model.classes_)
     else:
+        X = None
         pred = "ineligible"
         proba_dict = {"AS": -1, "QS": -1, "W": -1}
-    return pred, proba_dict
+    if return_features:
+        return pred, proba_dict, X
+    else:
+        return pred, proba_dict

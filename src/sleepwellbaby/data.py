@@ -99,7 +99,7 @@ def generate_mock_signalbase_data(duration: int = 48, freq: str = 'S') -> pd.Dat
 
 def compute_reference_values(
     df: pd.DataFrame,
-    freq: int = 1,
+    freq: float = 1,
     tolerance_2: float = 0.10,
     tolerance_24: float = 0.05
 ) -> pd.DataFrame:
