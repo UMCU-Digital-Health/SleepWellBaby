@@ -100,17 +100,21 @@ def return_y_pred(
     return y_pred
 
 
-def get_prediction(payload, model=None, model_support_dict=None):
+def get_prediction(payload, model=None, model_support_dict=None, return_features=False):
     if (model is None) | (model_support_dict is None):
         model, model_support_dict = load_model()
 
     eligible = check_eligibility(payload)
 
     if eligible:
-        df = pipeline(payload, model_support_dict)
-        pred_proba = model.predict_proba(df)
+        X = pipeline(payload, model_support_dict)
+        pred_proba = model.predict_proba(X)
         pred, proba_dict = process_prediction(pred_proba, model.classes_)
     else:
+        X = None
         pred = "ineligible"
         proba_dict = {"AS": -1, "QS": -1, "W": -1}
-    return pred, proba_dict
+    if return_features:
+        return pred, proba_dict, X
+    else:
+        return pred, proba_dict

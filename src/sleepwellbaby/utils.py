@@ -1,9 +1,11 @@
 from typing import Iterable, List, Tuple
 
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 from sleepwellbaby.data import convert_to_payload
+from sleepwellbaby.preprocess import pipeline
 from sleepwellbaby.model import get_prediction, load_model
 
 
@@ -14,7 +16,8 @@ def get_swb_predictions(
     birth_date: str,
     gestation_period: int,
     freq: str = 'S',
-    missing_index_threshold: float = 0.1
+    missing_index_threshold: float = 0.1,
+    return_features: bool = True,
 ) -> Tuple[pd.DataFrame, List[str]]:
     """
     Generate SleepWellBaby (SWB) predictions for specified timestamps in a DataFrame.
@@ -41,6 +44,8 @@ def get_swb_predictions(
         Maximum allowed fraction of missing timestamps in the window for a prediction to be attempted.
         If the fraction of missing timestamps exceeds this threshold, a ValueError is raised.
         Default is 0.1 (i.e., 10%).
+    return_features : bool, optional
+        If set to True, include feature values in the resulting DataFrame.
 
     Returns
     -------
@@ -57,6 +62,7 @@ def get_swb_predictions(
     """
     model, model_support_dict = load_model()
     ref_columns = [c for c in df.columns if ('mean' in c) or ('std' in c)]
+    feature_columns = None
     for ix, t in enumerate(tqdm(indices, desc="Calculating SWB")):
         # Get the right timestamps for SWB, one every 2.5 seconds
         # For 1Hz data we round so we do not have to interpolate
@@ -76,13 +82,24 @@ def get_swb_predictions(
         if row[ref_columns].isna().any():
             pred = 'ineligible'
             proba_dict = {'AS': -1, 'QS': -1, 'W': -1}
+            X = None
         else:
             payload = convert_to_payload(temp, birth_date=birth_date, gestation_period=gestation_period)
-            pred, proba_dict = get_prediction(payload, model, model_support_dict)
+            
+            if return_features:
+                pred, proba_dict, X = get_prediction(payload, model, model_support_dict, return_features)
+            else:
+                pred, proba_dict = get_prediction(payload, model, model_support_dict, return_features)
         columns =list(proba_dict.keys())
         if ix == 0:
             df.loc[:, 'prediction'] = None
             df.loc[:, columns] = None
+            if return_features:
+                feature_columns = model_support_dict['Xcol']
+                df.loc[:, feature_columns] = np.nan
         df.loc[t, 'prediction'] = pred
         df.loc[t, columns] = pd.DataFrame(proba_dict, index=[0,]).iloc[0]
+        if return_features:
+            if X is not None:
+                df.loc[t, feature_columns] = X.iloc[0]
     return df, columns
