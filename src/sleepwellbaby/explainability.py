@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -72,48 +72,52 @@ def get_shap_values(
 
     return averaged_shap_values
 
-def dot_plot(shap_values, X, class_names):
-    def dot_plot(
-        shap_values: list,
-        X,
-        class_names: list[str]
-    ) -> list:
-        """
-        Generates dot summary plots for SHAP values for each class and returns the matplotlib figures.
+def dot_plot(shap_values: list,
+             X,
+             class_names: List[str],
+             xlabelsize: int = 10,
+             ylabelsize: int = 10,
+             ) -> list:
+            """
+            Generates dot summary plots for SHAP values for each class and returns the matplotlib figures.
 
-        Parameters
-        ----------
-        shap_values : list
-            A list of SHAP values arrays, one for each class.
-        X : array-like
-            The feature matrix used for SHAP summary plots.
-        class_names : list of str
-            List of class names corresponding to each set of SHAP values.
+            Parameters
+            ----------
+            shap_values : list
+                A list of SHAP values arrays, one for each class.
+            X : array-like
+                The feature matrix used for SHAP summary plots.
+            class_names : list of str
+                List of class names corresponding to each set of SHAP values.
+            xlabelsize : int
+                Label size on the x-axis, default is 10
+            ylabelsize : int
+                Label size on the y-axis, default is 10
 
-        Returns
-        -------
-        figs : list of matplotlib.figure.Figure
-            List of matplotlib figure objects containing the dot summary plots for each class.
-        """
-    figs = []
-    for i in range(len(class_names)):
-        f, ax = plt.subplots()
+            Returns
+            -------
+            figs : list of matplotlib.figure.Figure
+                List of matplotlib figure objects containing the dot summary plots for each class.
+            """
+            figs = []
+            for i in range(len(class_names)):
+                f, ax = plt.subplots()
 
-        shap.summary_plot(
-            shap_values=shap_values[i],
-            features=X,
-            plot_type='dot',
-            class_names=class_names[i],
-            max_display=10,
-            show=False,
-            color=None,
-            color_bar=True,
-        )
-        ax.set_title({"AS": "Active sleep", "QS": "Quiet sleep", "W": "Wake"}[class_names[i]])
-        ax.tick_params(axis='x', labelsize=8)
-        ax.tick_params(axis='y', labelsize=6)
-        ax.xaxis.label.set_size(8)
-        f.tight_layout()
-        plt.close(f)
-        figs.append(f)
-    return figs
+                shap.summary_plot(
+                    shap_values=shap_values[i],
+                    features=X,
+                    plot_type='dot',
+                    class_names=class_names[i],
+                    max_display=10,
+                    show=False,
+                    color=None,
+                    color_bar=True,
+                )
+                ax.set_title({"AS": "Active sleep", "QS": "Quiet sleep", "W": "Wake"}[class_names[i]])
+                ax.tick_params(axis='x', labelsize=xlabelsize)
+                ax.tick_params(axis='y', labelsize=ylabelsize)
+                ax.xaxis.label.set_size(xlabelsize)
+                f.tight_layout()
+                plt.close(f)
+                figs.append(f)
+            return figs
