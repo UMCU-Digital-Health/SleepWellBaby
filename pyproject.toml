@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sleepwellbaby"
-version = "1.0.0"
+version = "1.1.0"
 authors = [
   { name="Richard Bartels", email="r.t.bartels-6@umcutrecht.nl" },
 ]
@@ -19,11 +19,13 @@ dependencies =[
     "Flask>=1.1.4",
     "flask_restx>=0.2.0",
     "imbalanced-learn>=0.7.0",
+    "matplotlib>=3.2.2,<3.3",
     "numpy>=1.20.3,<1.23",
     "pandas>=1.2.5", 
     "scikit-learn>=1.0,<1.1",
     "tsfresh>=0.17.0",
     "setuptools",
+    "shap>=0.36.0",
 ]
 
 [dependency-groups]
